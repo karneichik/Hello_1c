@@ -5,10 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import by.karneichik.hello1c.pojo.Order
+import by.karneichik.hello1c.pojo.Product
 
-@Database(entities = [Order::class], version = 1, exportSchema = false)
+@Database(entities = [Order::class, Product::class], version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-
     companion object {
 
         private var db: AppDatabase? = null
@@ -33,4 +33,5 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
     abstract fun orderInfoDao(): OrderInfoDao
+    abstract fun orderProductsInfoDao(): OrderProductsInfoDao
 }

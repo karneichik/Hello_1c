@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import by.karneichik.hello1c.adapters.OrderInfoAdapter
 import by.karneichik.hello1c.pojo.Order
-import kotlinx.android.synthetic.main.activity_main.*
+import by.karneichik.hello1c.viewModels.OrderViewModel
 import kotlinx.android.synthetic.main.content_main.*
 
 class MainActivity : AppCompatActivity() {

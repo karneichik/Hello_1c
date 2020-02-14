@@ -88,15 +88,6 @@
                 app:layout_constraintTop_toBottomOf="@id/tvClient_FIO_Label"
                 tools:text="+375 29 6714503" />
 
-            <Button
-                android:id="@+id/buttonCall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/call_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tvClient_phone"
-                app:layout_constraintTop_toBottomOf="@+id/tvClient_FIO_Label" />
-
             <View
                 android:id="@+id/view"
                 android:layout_width="match_parent"
@@ -227,37 +218,24 @@
                 app:layout_constraintTop_toBottomOf="@id/tvPayForm_label"
                 tools:text="21:05:16" />
 
+
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonSave"
+        android:id="@+id/rvProductList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
-
-    <Button
-        android:id="@+id/buttonSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/save_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/buttonCancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/cancel_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        tools:listitem="@layout/item_product_info" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

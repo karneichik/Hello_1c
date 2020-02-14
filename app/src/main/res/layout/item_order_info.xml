@@ -15,38 +15,40 @@
             android:id="@+id/tvNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="8dp"
             android:textColor="#000"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/tvAddress"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tvTime"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="BTC / USD" />
+            tools:text="BTC - 58230" />
 
         <TextView
             android:id="@+id/tvAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="8dp"
+            android:textAlignment="center"
             android:textColor="#000"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="7500.52" />
+            app:layout_constraintTop_toBottomOf="@+id/tvNumber"
+            tools:text="Adress dostavki" />
 
         <TextView
             android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="8dp"
             android:textColor="#000"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvNumber"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Время последнего обновления: 21:52:33" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
