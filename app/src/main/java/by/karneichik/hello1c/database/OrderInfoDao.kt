@@ -33,6 +33,9 @@ interface OrderProductsInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertProducts(productList: List<Product>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertProduct(productList: Product)
+
     @Query("DELETE FROM orderProducts")
     fun deleteAllProducts()
 }

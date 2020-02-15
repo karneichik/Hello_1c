@@ -36,7 +36,7 @@ data class Product (
     @SerializedName("uid") @Expose val uid : String,
     @SerializedName("goods")@Expose val goods : String,
     @SerializedName("serial")@Expose val serial : String,
-    @SerializedName("delivered")@Expose val delivered : Boolean,
+    @SerializedName("delivered")@Expose var delivered : Boolean,
     @SerializedName("price")@Expose val price : Double,
     @SerializedName("sum")@Expose val sum : Double,
     @SerializedName("count")@Expose val count : Int

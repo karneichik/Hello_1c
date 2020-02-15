@@ -23,9 +23,9 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         return db.orderInfoDao().getOrderInfo(uid)
     }
 
-    init {
-        loadData()
-    }
+//    init {
+//        loadData()
+//    }
 
     private fun loadData() {
         val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return

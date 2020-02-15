@@ -21,4 +21,8 @@ class ProductsViewModel(application: Application) : AndroidViewModel(application
         return db.orderInfoDao().getOrderInfo(uid)
     }
 
+    fun update(product: Product) {
+        db.orderProductsInfoDao().insertProduct(product)
+    }
+
 }

@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Visibility
 import by.karneichik.hello1c.R
 import by.karneichik.hello1c.pojo.Product
 import kotlinx.android.synthetic.main.item_product_info.view.*
@@ -17,7 +16,18 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
             field = value
             notifyDataSetChanged()
         }
-    //var onOrderClickListener: OnOrderClickListener? = null
+
+    fun itemUpdate() {
+        notifyDataSetChanged()
+    }
+//    fun removeItem(model: Product, position: Int) {
+//        notifyDataSetChanged()
+//    }
+//    fun removeItem(model: Product, position: Int) {
+//        notifyDataSetChanged()
+//    }
+
+    fun getProduct(position: Int) = productInfoList[position]
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view =
@@ -31,6 +41,10 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
         val product = productInfoList[position]
         with(holder) {
             with(product) {
+
+                if (delivered)
+                lProductItem.setBackgroundColor(context.getColor(R.color.colorPrimaryDark))
+                else lProductItem.setBackgroundColor(context.getColor(R.color.colorAccent))
 
                 tvGoods.text  = goods
                 tvPrice.text = price.toString()
@@ -49,6 +63,7 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
         val tvSerial = itemView.tvSerial
         val tvPrice = itemView.tvPrice
         val tvSum = itemView.tvSum
+        val lProductItem = itemView.lProductItem
     }
 
 //    interface OnOrderClickListener {
