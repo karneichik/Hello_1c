@@ -4,8 +4,10 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.preference.PreferenceManager
 import by.karneichik.hello1c.api.ApiFactory
 import by.karneichik.hello1c.database.AppDatabase
+import by.karneichik.hello1c.helpers.PrefHelper
 import by.karneichik.hello1c.pojo.OrderWithProducts
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -26,19 +28,28 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadData() {
-        val disposable = ApiFactory.apiService.getOrders(mapOf("AccessTocen" to "007"))
-            .map { it.orders.map { it  } }
+        val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return
+        val disposable = ApiFactory.apiService.getOrders(mapOf("AccessToken" to accessToken))
+            .map { it.orders.map { it } }
             .subscribeOn(Schedulers.io())
             .subscribe({ it ->
+
+                //TODO add sync to server
+                db.orderInfoDao().deleteAllOrders()
+                db.orderProductsInfoDao().deleteAllProducts()
+
                 db.orderInfoDao().insertOrders(it)
                 val allProducts = it.flatMap { it.products }
-                db.orderProductsInfoDao().deleteAllProducts()
                 db.orderProductsInfoDao().insertProducts(allProducts)
                 Log.d("TEST_OF_LOADING_DATA", "Success: $it")
             }, {
                 Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
             })
         compositeDisposable.add(disposable)
+    }
+
+    fun refreshData() {
+        loadData()
     }
 
 //    private fun getPriceListFromRawData(

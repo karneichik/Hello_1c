@@ -14,4 +14,20 @@
     <string name="price_label">Price:</string>
     <string name="count_label">Count:</string>
     <string name="sum_label">Sum:</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="settings_login_token">Token</string>
+
+    <!-- Preference Titles -->
+    <string name="login_header">Login Token</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Token Preferences -->
+    <string name="token_title">Your token</string>
+
+    <!-- Sync Preferences -->
+    <string name="url_title">Set URL API</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 </resources>

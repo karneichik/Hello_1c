@@ -19,6 +19,9 @@ interface OrderInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertOrders(orderList: List<Order>)
+
+    @Query("DELETE FROM orders")
+    fun deleteAllOrders()
 }
 
 @Dao

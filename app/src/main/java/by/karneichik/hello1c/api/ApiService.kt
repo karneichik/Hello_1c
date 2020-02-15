@@ -1,5 +1,6 @@
 package by.karneichik.hello1c.api
 
+import android.content.Context
 import by.karneichik.hello1c.pojo.Orders
 import io.reactivex.Single
 import retrofit2.http.GET
@@ -10,7 +11,7 @@ interface ApiService {
 
 
     @GET("hs/delivery/get_orders")
-    fun getOrders(@HeaderMap headers: Map<String, String> )
+    fun getOrders(@HeaderMap headers: Map<String, String>)
             : Single<Orders>
 
     companion object {
