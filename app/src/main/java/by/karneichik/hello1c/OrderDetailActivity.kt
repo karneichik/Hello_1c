@@ -98,7 +98,7 @@ class OrderDetailActivity : AppCompatActivity() {
                     val position = viewHolder.adapterPosition
                     val product = adapter.getProduct(position)
 
-                    product.delivered = direction == ItemTouchHelper.LEFT
+                    product.delivered = !product.delivered
 
                     AsyncTask.execute {
                         productsViewModel.update(product)
@@ -125,13 +125,24 @@ class OrderDetailActivity : AppCompatActivity() {
                         val itemView = viewHolder.itemView
                         val height = itemView.bottom.toFloat() - itemView.top.toFloat()
                         val width = height / 3
+                        val myHolder : ProductListAdapter.ProductViewHolder = viewHolder as ProductListAdapter.ProductViewHolder
+                        val isDelivered = myHolder.isDelivered
 
-                        if (dX > 0) {
+                        if (isDelivered) {
+                            icon = getBitmapFromVectorDrawable( this@OrderDetailActivity, R.drawable.ic_clear_24px)
                             p.color = this@OrderDetailActivity.getColor(R.color.colorAccent)
+                        }
+                        else {
+                            icon = getBitmapFromVectorDrawable(this@OrderDetailActivity, R.drawable.ic_add_24px)
+                            p.color = this@OrderDetailActivity.getColor(R.color.colorPrimaryDark)
+                        }
+
+                        if (dX > 0 ) {
+//                            p.color = this@OrderDetailActivity.getColor(R.color.colorAccent)
                             val background =
                                 RectF(itemView.left.toFloat(), itemView.top.toFloat(), dX, itemView.bottom.toFloat())
                             c.drawRect(background, p)
-                            icon = getBitmapFromVectorDrawable( this@OrderDetailActivity, R.drawable.ic_clear_24px)
+//                            icon = getBitmapFromVectorDrawable( this@OrderDetailActivity, R.drawable.ic_clear_24px)
                             val icon_dest = RectF(
                                 itemView.left.toFloat() + width,
                                 itemView.top.toFloat() + width,
@@ -140,7 +151,7 @@ class OrderDetailActivity : AppCompatActivity() {
                             )
                             c.drawBitmap(icon, null, icon_dest, p)
                         } else {
-                            p.color = this@OrderDetailActivity.getColor(R.color.colorPrimaryDark)
+//                            p.color = this@OrderDetailActivity.getColor(R.color.colorPrimaryDark)
                             val background = RectF(
                                 itemView.right.toFloat() + dX,
                                 itemView.top.toFloat(),
@@ -148,7 +159,7 @@ class OrderDetailActivity : AppCompatActivity() {
                                 itemView.bottom.toFloat()
                             )
                             c.drawRect(background, p)
-                            icon = getBitmapFromVectorDrawable(this@OrderDetailActivity, R.drawable.ic_add_24px)
+//                            icon = getBitmapFromVectorDrawable(this@OrderDetailActivity, R.drawable.ic_add_24px)
                             val icon_dest = RectF(
                                 itemView.right.toFloat() - 2 * width,
                                 itemView.top.toFloat() + width,

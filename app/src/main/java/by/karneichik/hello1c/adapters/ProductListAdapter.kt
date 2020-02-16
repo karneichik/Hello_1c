@@ -51,6 +51,8 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
                 tvSum.text = sum.toString()
                 tvCount.text   = count.toString()
 
+                isDelivered = delivered
+
                 if (serial != "") tvSerial.text = serial else tvSerial.visibility = View.GONE
 
             }
@@ -64,6 +66,7 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
         val tvPrice = itemView.tvPrice
         val tvSum = itemView.tvSum
         val lProductItem = itemView.lProductItem
+        var isDelivered : Boolean = true
     }
 
 //    interface OnOrderClickListener {
