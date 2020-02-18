@@ -18,10 +18,12 @@ data class Order (
     @SerializedName("totalsum") @Expose var totalsum : Double,
     @SerializedName("payform") @Expose var payform : String,
     @SerializedName("time") @Expose var time : String,
+    @SerializedName("isDelivered") @Expose var isDelivered : Boolean,
+    @SerializedName("isCancelled") @Expose var isCancelled : Boolean,
     @Ignore @SerializedName("products") @Expose var products : List<Product>
 
 )
-{constructor(): this("", "","","","",0.0,"","", listOf())}
+{constructor(): this("", "","","","",0.0,"","", false, false,listOf())}
 
 @Entity(tableName = "orderProducts")
 //@Entity(tableName = "orderProducts",

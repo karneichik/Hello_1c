@@ -9,12 +9,14 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import by.karneichik.hello1c.adapters.OrderInfoAdapter
+import by.karneichik.hello1c.adapters.OrdersSection
 import by.karneichik.hello1c.helpers.PrefHelper
 import by.karneichik.hello1c.pojo.Order
 import by.karneichik.hello1c.viewModels.OrderViewModel
+import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,20 +30,36 @@ class MainActivity : AppCompatActivity() {
 
         PrefHelper.init(this)
 
-        val adapter = OrderInfoAdapter(this)
-        adapter.onOrderClickListener = object : OrderInfoAdapter.OnOrderClickListener {
-            override fun onOrderClick(order: Order) {
-                val intent = OrderDetailActivity.newIntent(
-                    this@MainActivity,
-                    order.uid
-                )
-                startActivity(intent)
-            }
-        }
+        val adapter = SectionedRecyclerViewAdapter()//OrderInfoAdapter(this)
+//        adapter.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
+//            override fun onOrderClick(order: Order) {
+//                val intent = OrderDetailActivity.newIntent(
+//                    this@MainActivity,
+//                    order.uid
+//                )
+//                startActivity(intent)
+//            }
+//        }
+
+
         rvOrderList.adapter = adapter
         viewModel = ViewModelProviders.of(this)[OrderViewModel::class.java]
         viewModel.orderList.observe(this, Observer {
-            adapter.orderInfoList = it
+            val splitedDate = splitDataToSection(it)
+            for (date in splitedDate!!.entries) {
+
+                val section = OrdersSection(date.value,date.key)
+                adapter.addSection(section)
+
+//                val sectionPos = adapter.getAdapterForSection(section).sectionPosition;
+//                adapter.notifyItemInserted(sectionPos);
+//                rvOrderList.smoothScrollToPosition(sectionPos);
+
+            }
+
+            adapter.notifyDataSetChanged()
+
+//            adapter.orderInfoList = it
         })
 
         srlMainView.setOnRefreshListener {
@@ -49,6 +67,22 @@ class MainActivity : AppCompatActivity() {
             srlMainView.isRefreshing = false
         }
 
+
+    }
+
+    fun splitDataToSection(list:List<Order>) : TreeMap<String,List<Order>>? {
+
+        var treeMap : TreeMap<String,List<Order>> = TreeMap()
+
+        val listCanceled:List<Order> = list.filter {it.isCancelled}
+        val listOnDelivery:List<Order> = list.filter { !it.isCancelled && !it.isDelivered }
+        val listDelivered:List<Order> = list.filter { it.isDelivered }
+
+        if (listOnDelivery.isNotEmpty()) treeMap.put(resources.getString(R.string.on_delivery),listOnDelivery)
+        if (listDelivered.isNotEmpty()) treeMap.put(resources.getString(R.string.delivered),listCanceled)
+        if (listCanceled.isNotEmpty()) treeMap.put(resources.getString(R.string.canceled),listDelivered)
+
+        return treeMap
 
     }
 

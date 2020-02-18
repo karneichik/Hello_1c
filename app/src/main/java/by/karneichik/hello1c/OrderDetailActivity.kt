@@ -130,11 +130,11 @@ class OrderDetailActivity : AppCompatActivity() {
 
                         if (isDelivered) {
                             icon = getBitmapFromVectorDrawable( this@OrderDetailActivity, R.drawable.ic_clear_24px)
-                            p.color = this@OrderDetailActivity.getColor(R.color.colorAccent)
+                            p.color = this@OrderDetailActivity.getColor(R.color.colorCancel)
                         }
                         else {
                             icon = getBitmapFromVectorDrawable(this@OrderDetailActivity, R.drawable.ic_add_24px)
-                            p.color = this@OrderDetailActivity.getColor(R.color.colorPrimaryDark)
+                            p.color = this@OrderDetailActivity.getColor(R.color.colorDelivered)
                         }
 
                         if (dX > 0 ) {

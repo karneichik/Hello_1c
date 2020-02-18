@@ -43,8 +43,8 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
             with(product) {
 
                 if (delivered)
-                lProductItem.setBackgroundColor(context.getColor(R.color.colorPrimaryDark))
-                else lProductItem.setBackgroundColor(context.getColor(R.color.colorAccent))
+                lProductItem.setBackgroundColor(context.getColor(R.color.colorDelivered))
+                else lProductItem.setBackgroundColor(context.getColor(R.color.colorCancel))
 
                 tvGoods.text  = goods
                 tvPrice.text = price.toString()

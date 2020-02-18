@@ -16,6 +16,9 @@
     <string name="sum_label">Sum:</string>
     <string name="title_activity_settings">Settings</string>
     <string name="settings_login_token">Token</string>
+    <string name="on_delivery">On delivery</string>
+    <string name="delivered">Delivered</string>
+    <string name="canceled">Canceled</string>
 
     <!-- Preference Titles -->
     <string name="login_header">Login Token</string>
