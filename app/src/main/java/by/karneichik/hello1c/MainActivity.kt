@@ -49,7 +49,17 @@ class MainActivity : AppCompatActivity() {
             for (date in splitedDate!!.entries) {
 
                 val section = OrdersSection(date.value,date.key)
+                section.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
+                    override fun onOrderClick(order: Order) {
+                        val intent = OrderDetailActivity.newIntent(
+                            this@MainActivity,
+                            order.uid
+                        )
+                        startActivity(intent)
+                    }
+                }
                 adapter.addSection(section)
+
 
 //                val sectionPos = adapter.getAdapterForSection(section).sectionPosition;
 //                adapter.notifyItemInserted(sectionPos);

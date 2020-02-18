@@ -1,16 +1,12 @@
 <resources>
     <string name="app_name">Hello 1c</string>
     <string name="action_settings">Settings</string>
-    <string name="new_hello">Hello Kotlin!</string>
     <string name="client_FIO_label">Client name:</string>
     <string name="client_phone_label">Client phone:</string>
     <string name="address_label">Address:</string>
     <string name="totalSum_label">Sum:</string>
     <string name="payForm_label">Payform</string>
     <string name="time_label">Delivery time:</string>
-    <string name="save_button">Save</string>
-    <string name="cancel_button">Cancel</string>
-    <string name="call_button">Call</string>
     <string name="price_label">Price:</string>
     <string name="count_label">Count:</string>
     <string name="sum_label">Sum:</string>
