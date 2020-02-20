@@ -25,8 +25,7 @@
 
     <!-- Sync Preferences -->
     <string name="url_title">Set URL API</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel_order">Cancel order</string>
+
 </resources>

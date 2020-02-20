@@ -6,9 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility
 import by.karneichik.hello1c.adapters.OrdersSection
 import by.karneichik.hello1c.helpers.PrefHelper
 import by.karneichik.hello1c.pojo.Order
@@ -30,23 +33,14 @@ class MainActivity : AppCompatActivity() {
 
         PrefHelper.init(this)
 
-        val adapter = SectionedRecyclerViewAdapter()//OrderInfoAdapter(this)
-//        adapter.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
-//            override fun onOrderClick(order: Order) {
-//                val intent = OrderDetailActivity.newIntent(
-//                    this@MainActivity,
-//                    order.uid
-//                )
-//                startActivity(intent)
-//            }
-//        }
-
+        val adapter = SectionedRecyclerViewAdapter()
 
         rvOrderList.adapter = adapter
         viewModel = ViewModelProviders.of(this)[OrderViewModel::class.java]
-        viewModel.orderList.observe(this, Observer {
+        viewModel.orderList.observe(this, Observer { it ->
             val splitedDate = splitDataToSection(it)
-            for (date in splitedDate!!.entries) {
+            adapter.removeAllSections()
+            for (date in splitedDate!!.entries.sortedByDescending { it.key }) {
 
                 val section = OrdersSection(date.value,date.key)
                 section.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
@@ -59,38 +53,34 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 adapter.addSection(section)
-
-
-//                val sectionPos = adapter.getAdapterForSection(section).sectionPosition;
-//                adapter.notifyItemInserted(sectionPos);
-//                rvOrderList.smoothScrollToPosition(sectionPos);
-
             }
 
             adapter.notifyDataSetChanged()
 
-//            adapter.orderInfoList = it
         })
 
         srlMainView.setOnRefreshListener {
-            viewModel.refreshData()
+            foreground.visibility = View.VISIBLE
+            viewModel.refreshData(foreground)
             srlMainView.isRefreshing = false
         }
 
+        foreground.visibility = View.GONE
 
     }
 
-    fun splitDataToSection(list:List<Order>) : TreeMap<String,List<Order>>? {
+    private fun splitDataToSection(list:List<Order>) : TreeMap<String,List<Order>>? {
 
-        var treeMap : TreeMap<String,List<Order>> = TreeMap()
+        val treeMap : TreeMap<String,List<Order>> = TreeMap()
 
         val listCanceled:List<Order> = list.filter {it.isCancelled}
         val listOnDelivery:List<Order> = list.filter { !it.isCancelled && !it.isDelivered }
         val listDelivered:List<Order> = list.filter { it.isDelivered }
 
-        if (listOnDelivery.isNotEmpty()) treeMap.put(resources.getString(R.string.on_delivery),listOnDelivery)
-        if (listDelivered.isNotEmpty()) treeMap.put(resources.getString(R.string.delivered),listCanceled)
-        if (listCanceled.isNotEmpty()) treeMap.put(resources.getString(R.string.canceled),listDelivered)
+        if (listCanceled.isNotEmpty()) treeMap[resources.getString(R.string.canceled)] = listCanceled
+        if (listDelivered.isNotEmpty()) treeMap[resources.getString(R.string.delivered)] = listDelivered
+        if (listOnDelivery.isNotEmpty()) treeMap[resources.getString(R.string.on_delivery)] = listOnDelivery
+
 
         return treeMap
 
@@ -103,9 +93,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))

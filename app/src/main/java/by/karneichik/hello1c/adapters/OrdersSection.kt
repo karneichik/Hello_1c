@@ -1,13 +1,17 @@
 package by.karneichik.hello1c.adapters
 
+import android.graphics.Color
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.hello1c.R
 import by.karneichik.hello1c.pojo.Order
 import io.github.luizgrp.sectionedrecyclerviewadapter.Section
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionParameters
+import kotlin.coroutines.coroutineContext
 
 
+//class OrdersSection(private val list: List<Order>,private val title:Int) : Section(
 class OrdersSection(private val list: List<Order>,private val title:String) : Section(
     SectionParameters.builder()
         .headerResourceId(R.layout.item_order_header)
@@ -52,6 +56,7 @@ class OrdersSection(private val list: List<Order>,private val title:String) : Se
         val headerHolder = holder as HeaderViewHolder
 
         headerHolder.tvTitle.text = title
+//        headerHolder.tvTitle.setBackgroundColor(Color.parseColor("#ffffff"))
 
     }
 

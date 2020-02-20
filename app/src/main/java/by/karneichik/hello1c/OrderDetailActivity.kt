@@ -2,10 +2,15 @@ package by.karneichik.hello1c
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -15,16 +20,43 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.hello1c.adapters.ProductListAdapter
 import by.karneichik.hello1c.viewModels.OrderViewModel
-import by.karneichik.hello1c.viewModels.ProductsViewModel
 import kotlinx.android.synthetic.main.activity_order_detail.*
 
 
 class OrderDetailActivity : AppCompatActivity() {
 
     private lateinit var viewModel: OrderViewModel
-    private lateinit var productsViewModel: ProductsViewModel
     private var adapter: ProductListAdapter = ProductListAdapter(this)
     private val p = Paint()
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_order_detail, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
+        return when (item.itemId) {
+            R.id.action_save -> {
+
+                Toast.makeText(this@OrderDetailActivity, R.string.action_save, Toast.LENGTH_SHORT)
+                    .show()
+                viewModel.saveOrder(uid)
+                finish()
+                true
+
+            }
+            R.id.action_cancel_order -> {
+                Toast.makeText(this@OrderDetailActivity, R.string.action_cancel_order, Toast.LENGTH_SHORT)
+                    .show()
+                viewModel.cancelOrder(uid)
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +72,7 @@ class OrderDetailActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this)[OrderViewModel::class.java]
         viewModel.getOrderInfo(uid).observe(this, Observer {
-            with(it.order) {
+            with(it) {
                 tvClient_FIO.text = client_fio
                 tvClient_phone.text = client_phone.toString()
                 tvAddress.text = address
@@ -65,8 +97,7 @@ class OrderDetailActivity : AppCompatActivity() {
 //        val adapter = ProductListAdapter(this)
         rvProductList.adapter = adapter
 
-        productsViewModel = ViewModelProviders.of(this)[ProductsViewModel::class.java]
-        productsViewModel.getProductsList(uid).observe(this, Observer {
+        viewModel.getProductsList(uid).observe(this, Observer {
             adapter.productInfoList = it
         })
 //        productsViewModel.getOrderInfo(uid).observe(this, Observer {
@@ -101,7 +132,7 @@ class OrderDetailActivity : AppCompatActivity() {
                     product.delivered = !product.delivered
 
                     AsyncTask.execute {
-                        productsViewModel.update(product)
+                        viewModel.update(product)
                     }
                     adapter.itemUpdate()
 

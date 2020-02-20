@@ -20,4 +20,6 @@
     <string name="token_title">Ваш токен</string>
     <string name="totalSum_label">Итого:</string>
     <string name="url_title">Адрес синхронизации</string>
+    <string name="action_cancel_order">Отменить заказ</string>
+    <string name="action_save">Сохранить заказ</string>
 </resources>

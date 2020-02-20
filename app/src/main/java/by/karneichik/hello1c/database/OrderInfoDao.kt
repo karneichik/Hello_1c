@@ -2,6 +2,7 @@ package by.karneichik.hello1c.database
 
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.room.*
 import by.karneichik.hello1c.pojo.Order
 import by.karneichik.hello1c.pojo.OrderWithProducts
@@ -15,10 +16,23 @@ interface OrderInfoDao {
 
     @Transaction
     @Query("SELECT * FROM orders WHERE uid == :uid")
-    fun getOrderInfo(uid: String): LiveData<OrderWithProducts>
+    fun getOrderWithProductsInfo(uid: String): LiveData<OrderWithProducts>
+
+    @Query("SELECT * FROM orders WHERE uid == :uid")
+    fun getOrderInfoLiveDate(uid: String): LiveData<Order>
+
+    @Query("SELECT * FROM orders WHERE uid == :uid")
+    fun getOrderInfo(uid: String): Order
+
+    @Transaction
+    @Query("SELECT * FROM orders")
+    fun getAllOrders(): List<OrderWithProducts>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertOrders(orderList: List<Order>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertOrder(orderList: Order)
 
     @Query("DELETE FROM orders")
     fun deleteAllOrders()
@@ -28,7 +42,10 @@ interface OrderInfoDao {
 interface OrderProductsInfoDao {
 
     @Query("SELECT * FROM orderProducts WHERE uid == :uid")
-    fun getOrderProducts(uid: String): LiveData<List<Product>>
+    fun getOrderProductsLiveData(uid: String): LiveData<List<Product>>
+
+    @Query("SELECT * FROM orderProducts WHERE uid == :uid")
+    fun getOrderProductsList(uid: String): List<Product>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertProducts(productList: List<Product>)

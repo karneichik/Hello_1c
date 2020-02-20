@@ -3,21 +3,19 @@ package by.karneichik.hello1c.pojo
 import androidx.room.*
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.lang.reflect.Constructor
-import java.util.Arrays.asList
 
 
 @Entity(tableName = "orders")
 data class Order (
 
     @PrimaryKey @SerializedName("uid") @Expose var uid : String,
-    @SerializedName("number") @Expose var number : String,
-    @SerializedName("client_fio") @Expose var client_fio : String,
-    @SerializedName("client_phone") @Expose var client_phone : String,
-    @SerializedName("address") @Expose var address : String,
-    @SerializedName("totalsum") @Expose var totalsum : Double,
-    @SerializedName("payform") @Expose var payform : String,
-    @SerializedName("time") @Expose var time : String,
+    @SerializedName("number") var number : String,
+    @SerializedName("client_fio") var client_fio : String,
+    @SerializedName("client_phone") var client_phone : String,
+    @SerializedName("address") var address : String,
+    @SerializedName("totalsum") var totalsum : Double,
+    @SerializedName("payform") var payform : String,
+    @SerializedName("time") var time : String,
     @SerializedName("isDelivered") @Expose var isDelivered : Boolean,
     @SerializedName("isCancelled") @Expose var isCancelled : Boolean,
     @Ignore @SerializedName("products") @Expose var products : List<Product>
@@ -36,6 +34,7 @@ data class Product (
 
     @PrimaryKey(autoGenerate = true) val id : Int,
     @SerializedName("uid") @Expose val uid : String,
+    @SerializedName("good_uid") @Expose val good_uid : String,
     @SerializedName("goods")@Expose val goods : String,
     @SerializedName("serial")@Expose val serial : String,
     @SerializedName("delivered")@Expose var delivered : Boolean,

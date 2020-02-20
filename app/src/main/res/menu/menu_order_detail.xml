@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="by.karneichik.hello1c.MainActivity">
+
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_save"
+        android:icon="@drawable/ic_save"/>
+
+    <item
+        android:id="@+id/action_cancel_order"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_cancel_order"
+        android:icon="@drawable/ic_clear_24px"
+        android:iconTint="#FFFFFF"/>
+
+</menu>
