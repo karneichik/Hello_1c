@@ -1,4 +1,4 @@
-package by.karneichik.hello1c
+package by.karneichik.DeliveryService
 
 import android.content.Context
 import android.content.Intent
@@ -18,8 +18,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import by.karneichik.hello1c.adapters.ProductListAdapter
-import by.karneichik.hello1c.viewModels.OrderViewModel
+import by.karneichik.DeliveryService.adapters.ProductListAdapter
+import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import kotlinx.android.synthetic.main.activity_order_detail.*
 
 

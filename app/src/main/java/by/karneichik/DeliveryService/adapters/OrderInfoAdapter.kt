@@ -1,11 +1,11 @@
-package by.karneichik.hello1c.adapters
+package by.karneichik.DeliveryService.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import by.karneichik.hello1c.R
-import by.karneichik.hello1c.pojo.Order
+import by.karneichik.DeliveryService.R
+import by.karneichik.DeliveryService.pojo.Order
 
 class OrderInfoAdapter(private val context: Context) : RecyclerView.Adapter<OrderViewHolder>() {
 

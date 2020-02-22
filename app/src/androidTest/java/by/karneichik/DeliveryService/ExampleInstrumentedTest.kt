@@ -1,4 +1,4 @@
-package by.karneichik.hello1c
+package by.karneichik.DeliveryService
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

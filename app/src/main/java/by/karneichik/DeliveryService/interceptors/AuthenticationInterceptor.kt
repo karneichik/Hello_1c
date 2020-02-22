@@ -1,4 +1,4 @@
-package by.karneichik.hello1c.interceptors
+package by.karneichik.DeliveryService.interceptors
 
 import okhttp3.Credentials
 import okhttp3.Interceptor

@@ -1,7 +1,7 @@
-package by.karneichik.hello1c.api
+package by.karneichik.DeliveryService.api
 
 
-import by.karneichik.hello1c.helpers.PrefHelper
+import by.karneichik.DeliveryService.helpers.PrefHelper
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory

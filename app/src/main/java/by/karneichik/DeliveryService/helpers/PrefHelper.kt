@@ -1,4 +1,4 @@
-package by.karneichik.hello1c.helpers
+package by.karneichik.DeliveryService.helpers
 
 import android.content.Context
 import android.content.SharedPreferences

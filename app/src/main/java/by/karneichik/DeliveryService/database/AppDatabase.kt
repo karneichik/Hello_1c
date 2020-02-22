@@ -1,11 +1,11 @@
-package by.karneichik.hello1c.database
+package by.karneichik.DeliveryService.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import by.karneichik.hello1c.pojo.Order
-import by.karneichik.hello1c.pojo.Product
+import by.karneichik.DeliveryService.pojo.Order
+import by.karneichik.DeliveryService.pojo.Product
 
 @Database(entities = [Order::class, Product::class], version = 9, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {

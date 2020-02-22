@@ -1,4 +1,4 @@
-package by.karneichik.hello1c
+package by.karneichik.DeliveryService
 
 import org.junit.Test
 

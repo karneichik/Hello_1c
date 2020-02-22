@@ -1,4 +1,4 @@
-package by.karneichik.hello1c
+package by.karneichik.DeliveryService
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

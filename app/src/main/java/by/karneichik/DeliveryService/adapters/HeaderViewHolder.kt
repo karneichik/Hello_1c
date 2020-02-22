@@ -1,4 +1,4 @@
-package by.karneichik.hello1c.adapters
+package by.karneichik.DeliveryService.adapters
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

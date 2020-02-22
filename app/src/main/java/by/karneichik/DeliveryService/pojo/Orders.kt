@@ -1,4 +1,4 @@
-package by.karneichik.hello1c.pojo
+package by.karneichik.DeliveryService.pojo
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName

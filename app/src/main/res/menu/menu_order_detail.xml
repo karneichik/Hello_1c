@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="by.karneichik.hello1c.MainActivity">
+    tools:context="by.karneichik.DeliveryService.MainActivity">
 
     <item
         android:id="@+id/action_save"
@@ -16,6 +16,6 @@
         app:showAsAction="ifRoom"
         android:title="@string/action_cancel_order"
         android:icon="@drawable/ic_clear_24px"
-        android:iconTint="#FFFFFF"/>
+        />
 
 </menu>

@@ -1,6 +1,6 @@
-package by.karneichik.hello1c.api
+package by.karneichik.DeliveryService.api
 
-import by.karneichik.hello1c.pojo.Orders
+import by.karneichik.DeliveryService.pojo.Orders
 import io.reactivex.Single
 import retrofit2.Call
 import retrofit2.http.Body

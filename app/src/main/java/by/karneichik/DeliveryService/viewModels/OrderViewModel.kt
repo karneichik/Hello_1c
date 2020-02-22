@@ -1,4 +1,4 @@
-package by.karneichik.hello1c.viewModels
+package by.karneichik.DeliveryService.viewModels
 
 import android.app.Application
 import android.os.AsyncTask
@@ -10,12 +10,12 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import by.karneichik.hello1c.api.ApiFactory
-import by.karneichik.hello1c.database.AppDatabase
-import by.karneichik.hello1c.helpers.PrefHelper
-import by.karneichik.hello1c.pojo.Order
-import by.karneichik.hello1c.pojo.Orders
-import by.karneichik.hello1c.pojo.Product
+import by.karneichik.DeliveryService.api.ApiFactory
+import by.karneichik.DeliveryService.database.AppDatabase
+import by.karneichik.DeliveryService.helpers.PrefHelper
+import by.karneichik.DeliveryService.pojo.Order
+import by.karneichik.DeliveryService.pojo.Orders
+import by.karneichik.DeliveryService.pojo.Product
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
@@ -53,6 +53,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
             val order = db.orderInfoDao().getOrderInfo(uid)
             order.isCancelled = true
+            order.isDelivered = true
             db.orderInfoDao().insertOrder(order)
 
             val products = db.orderProductsInfoDao().getOrderProductsList(uid)

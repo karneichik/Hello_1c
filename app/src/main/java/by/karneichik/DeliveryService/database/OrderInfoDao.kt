@@ -1,12 +1,11 @@
-package by.karneichik.hello1c.database
+package by.karneichik.DeliveryService.database
 
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.room.*
-import by.karneichik.hello1c.pojo.Order
-import by.karneichik.hello1c.pojo.OrderWithProducts
-import by.karneichik.hello1c.pojo.Product
+import by.karneichik.DeliveryService.pojo.Order
+import by.karneichik.DeliveryService.pojo.OrderWithProducts
+import by.karneichik.DeliveryService.pojo.Product
 
 
 @Dao

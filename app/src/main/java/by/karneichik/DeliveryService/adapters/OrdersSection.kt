@@ -1,14 +1,11 @@
-package by.karneichik.hello1c.adapters
+package by.karneichik.DeliveryService.adapters
 
-import android.graphics.Color
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import by.karneichik.hello1c.R
-import by.karneichik.hello1c.pojo.Order
+import by.karneichik.DeliveryService.R
+import by.karneichik.DeliveryService.pojo.Order
 import io.github.luizgrp.sectionedrecyclerviewadapter.Section
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionParameters
-import kotlin.coroutines.coroutineContext
 
 
 //class OrdersSection(private val list: List<Order>,private val title:Int) : Section(
