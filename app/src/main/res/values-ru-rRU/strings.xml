@@ -3,16 +3,14 @@
     <string name="app_name">Служба доставки</string>
     <string name="action_settings">Настройки</string>
     <string name="address_label">Адрес:</string>
-    <string name="canceled">Отменены</string>
+    <string name="order_to_return">На возврат</string>
     <string name="client_FIO_label">Имя:</string>
     <string name="client_phone_label">Телефон:</string>
     <string name="count_label">Кол-во:</string>
-    <string name="delivered">Доставлено</string>
     <string name="login_header">Токен доступа</string>
-    <string name="on_delivery">На доставке</string>
+    <string name="order_on_delivery">На доставку</string>
     <string name="payForm_label">Оплата:</string>
     <string name="price_label">Цена:</string>
-    <string name="settings_login_token">Токен</string>
     <string name="sum_label">Сумма</string>
     <string name="sync_header">Настройки синхронизации</string>
     <string name="time_label">Время:</string>
@@ -23,4 +21,5 @@
     <string name="action_cancel_order">Отменить заказ</string>
     <string name="action_save">Сохранить заказ</string>
     <string name="action_sign_out">Отключить Google Account</string>
+    <string name="order_delivered">Доставлено</string>
 </resources>

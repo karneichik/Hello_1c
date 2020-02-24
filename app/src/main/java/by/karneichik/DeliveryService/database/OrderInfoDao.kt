@@ -13,6 +13,15 @@ interface OrderInfoDao {
     @Query("SELECT * FROM orders ORDER BY number DESC")
     fun getOrdersList(): LiveData<List<Order>>
 
+    @Query("SELECT * FROM orders WHERE isCancelled = 0 and isDelivered = 0 ORDER BY number DESC")
+    fun getOrdersList1(): LiveData<List<Order>>
+    @Query("SELECT DISTINCT orders.* FROM orders LEFT JOIN orderProducts ON orders.uid = orderProducts.uid " +
+            "WHERE (isCancelled = 1 or isDelivered = 1) and orderProducts.delivered = 0 " +
+            "ORDER BY number DESC")
+    fun getOrdersList2(): LiveData<List<Order>>
+    @Query("SELECT * FROM orders WHERE isCancelled = 0 and isDelivered = 1 ORDER BY number DESC")
+    fun getOrdersList3(): LiveData<List<Order>>
+
     @Transaction
     @Query("SELECT * FROM orders WHERE uid == :uid")
     fun getOrderWithProductsInfo(uid: String): LiveData<OrderWithProducts>

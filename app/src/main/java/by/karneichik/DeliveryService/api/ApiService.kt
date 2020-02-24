@@ -11,18 +11,11 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-
     @GET("hs/delivery/get_orders")
     fun getOrders(@HeaderMap headers: Map<String, String>)
             : Single<Orders>
 
     @POST("hs/delivery/get_orders")
     fun syncOrders(@Body orders: Orders) : Call<String>
-//    fun syncOrders(@Body orders: String) : Call<String>
-
-    companion object {
-//        private val HEADERS = mapOf("AccessToken" to "007")
-
-    }
 
 }

@@ -15,7 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.DeliveryService.adapters.ProductListAdapter
@@ -70,7 +70,7 @@ class OrderDetailActivity : AppCompatActivity() {
         }
         val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
 
-        viewModel = ViewModelProviders.of(this)[OrderViewModel::class.java]
+        viewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
         viewModel.getOrderInfo(uid).observe(this, Observer {
             with(it) {
                 tvClient_FIO.text = client_fio
@@ -132,7 +132,7 @@ class OrderDetailActivity : AppCompatActivity() {
                     product.delivered = !product.delivered
 
                     AsyncTask.execute {
-                        viewModel.update(product)
+                        viewModel.updateProduct(product)
                     }
                     adapter.itemUpdate()
 
@@ -229,7 +229,7 @@ class OrderDetailActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_UID_ORDER = "uid"
 
-        fun newIntent(context: Context, uid: String): Intent {
+        fun newIntent(context: Context?, uid: String): Intent {
             val intent = Intent(context, OrderDetailActivity::class.java)
             intent.putExtra(EXTRA_UID_ORDER, uid)
             return intent

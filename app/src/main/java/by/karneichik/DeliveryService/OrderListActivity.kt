@@ -5,23 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-import by.karneichik.DeliveryService.adapters.OrdersSection
+import androidx.lifecycle.ViewModelProvider
+import by.karneichik.DeliveryService.adapters.TabsPagerAdapter
 import by.karneichik.DeliveryService.helpers.PrefHelper
-import by.karneichik.DeliveryService.pojo.Order
 import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import com.google.firebase.auth.FirebaseAuth
-import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_orders_list.*
-import kotlinx.android.synthetic.main.content_main.*
-import java.util.*
 
 
 class OrderListActivity : AppCompatActivity() {
 
+    private val TAG = "TEST_OF_LOADING_DATA"
     private lateinit var viewModel: OrderViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,39 +26,60 @@ class OrderListActivity : AppCompatActivity() {
 
         PrefHelper.init(this)
 
-        val adapter = SectionedRecyclerViewAdapter()
+        viewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
+//        viewModel.orderList.observe(this, Observer { it ->
+//            val splitedDate = splitDataToSection(it)
+//            adapter.removeAllSections()
+//            for (date in splitedDate!!.entries.sortedByDescending { it.key }) {
+//
+//                val section = OrdersSection(date.value,date.key)
+//                section.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
+//                    override fun onOrderClick(order: Order) {
+//                        val intent = OrderDetailActivity.newIntent(
+//                            this@OrderListActivity,
+//                            order.uid
+//                        )
+//                        startActivity(intent)
+//                    }
+//                }
+//                adapter.addSection(section)
+//            }
 
-        rvOrderList.adapter = adapter
-        viewModel = ViewModelProviders.of(this)[OrderViewModel::class.java]
-        viewModel.orderList.observe(this, Observer { it ->
-            val splitedDate = splitDataToSection(it)
-            adapter.removeAllSections()
-            for (date in splitedDate!!.entries.sortedByDescending { it.key }) {
+//            adapter.notifyDataSetChanged()
 
-                val section = OrdersSection(date.value,date.key)
-                section.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
-                    override fun onOrderClick(order: Order) {
-                        val intent = OrderDetailActivity.newIntent(
-                            this@OrderListActivity,
-                            order.uid
-                        )
-                        startActivity(intent)
-                    }
-                }
-                adapter.addSection(section)
-            }
+//        })
 
-            adapter.notifyDataSetChanged()
-
-        })
 
         srlMainView.setOnRefreshListener {
-            foreground.visibility = View.VISIBLE
-            viewModel.refreshData(foreground)
-            srlMainView.isRefreshing = false
+            viewModel.refreshData(srlMainView)
+            srlMainView.isRefreshing = true
         }
 
-        foreground.visibility = View.GONE
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
+
+        val tabsPagerAdapter = TabsPagerAdapter(this,supportFragmentManager)
+        view_pager.adapter = tabsPagerAdapter
+        tabs.setupWithViewPager(view_pager)
+
+
+//        floatingActionButton.setOnClickListener {
+//            FirebaseInstanceId.getInstance().instanceId
+//                .addOnCompleteListener(OnCompleteListener { task ->
+//                    if (!task.isSuccessful) {
+//                        Log.w(TAG, "getInstanceId failed", task.exception)
+//                        return@OnCompleteListener
+//                    }
+//
+//                    // Get new Instance ID token
+//                    val token = task.result?.token
+//
+//                    // Log and toast
+//                    val msg = getString(R.string.msg_token_fmt, token)
+//                    Log.d(TAG, msg)
+//                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+//                })
+//
+//        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -89,27 +106,12 @@ class OrderListActivity : AppCompatActivity() {
         }
     }
 
-    private fun splitDataToSection(list:List<Order>) : TreeMap<String, List<Order>>? {
-
-        val treeMap : TreeMap<String, List<Order>> = TreeMap()
-
-        val listCanceled:List<Order> = list.filter {it.isCancelled}
-        val listOnDelivery:List<Order> = list.filter { !it.isCancelled && !it.isDelivered }
-        val listDelivered:List<Order> = list.filter { it.isDelivered }
-
-        if (listCanceled.isNotEmpty()) treeMap[resources.getString(R.string.canceled)] = listCanceled
-        if (listDelivered.isNotEmpty()) treeMap[resources.getString(R.string.delivered)] = listDelivered
-        if (listOnDelivery.isNotEmpty()) treeMap[resources.getString(R.string.on_delivery)] = listOnDelivery
-
-
-        return treeMap
-
-    }
-
     private fun signOut() {
         startActivity(MainActivity.getLaunchIntent(this))
         FirebaseAuth.getInstance().signOut()
         finish()
     }
+
+
 
 }

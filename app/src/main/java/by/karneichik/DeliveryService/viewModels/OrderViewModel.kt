@@ -2,15 +2,16 @@ package by.karneichik.DeliveryService.viewModels
 
 import android.app.Application
 import android.os.AsyncTask
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.view.View
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import by.karneichik.DeliveryService.R
 import by.karneichik.DeliveryService.api.ApiFactory
+import by.karneichik.DeliveryService.api.ApiService
 import by.karneichik.DeliveryService.database.AppDatabase
 import by.karneichik.DeliveryService.helpers.PrefHelper
 import by.karneichik.DeliveryService.pojo.Order
@@ -18,9 +19,11 @@ import by.karneichik.DeliveryService.pojo.Orders
 import by.karneichik.DeliveryService.pojo.Product
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_orders_list.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
 
 
 class OrderViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,9 +32,24 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     private val compositeDisposable = CompositeDisposable()
     private lateinit var allProducts : LiveData<List<Product>>
     private lateinit var order : LiveData<Order>
+    private lateinit var orders: LiveData<List<Order>>
     private val context = application.applicationContext
+    private val _index = MutableLiveData<Int>()
+    var orderList = db.orderInfoDao().getOrdersList1()
 
-    val orderList = db.orderInfoDao().getOrdersList()
+    val text: LiveData<String> = Transformations.map(_index) {
+        "Hello world from section: $it"
+    }
+
+    fun setIndex(index: Int) {
+        _index.value = index
+        orderList = when (index) {
+            0-> db.orderInfoDao().getOrdersList1()
+            1-> db.orderInfoDao().getOrdersList2()
+            2-> db.orderInfoDao().getOrdersList3()
+            else -> db.orderInfoDao().getOrdersList1()
+        }
+    }
 
     fun getOrderInfo(uid: String): LiveData<Order> {
         order = db.orderInfoDao().getOrderInfoLiveDate(uid)
@@ -43,7 +61,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         return allProducts
     }
 
-    fun update(product: Product) {
+    fun updateProduct(product: Product) {
         db.orderProductsInfoDao().insertProduct(product)
     }
 
@@ -71,6 +89,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
             val order = db.orderInfoDao().getOrderInfo(uid)
             order.isDelivered = true
+            order.isCancelled = false
             db.orderInfoDao().insertOrder(order)
 
             syncOrders()
@@ -92,6 +111,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
                     Toast.makeText(context, response.body().toString(), Toast.LENGTH_LONG)
                         .show()
+                    loadData()
                     Log.d("TEST_OF_LOADING_DATA", "Success: $response")
 
                 }
@@ -100,13 +120,13 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    private fun loadData(layout: ConstraintLayout? = null) {
+    private fun loadData(srlMainView: SwipeRefreshLayout? = null) {
+
         val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return
-//        val context:Context = getApplication()
-//        val toast = Toast(context)
         val disposable = ApiFactory.apiService.getOrders(mapOf("AccessToken" to accessToken))
             .map { it -> it.orders.map { it } }
             .subscribeOn(Schedulers.io())
+            .doFinally{if ( srlMainView != null ) srlMainView.isRefreshing = false }
             .subscribe({ it ->
 
                 //TODO add sync to server
@@ -117,16 +137,16 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
                 val allProducts = it.flatMap { it.products }
                 db.orderProductsInfoDao().insertProducts(allProducts)
 
-                Handler(Looper.getMainLooper()).post {
-                    layout?.visibility = View.GONE
-                    Toast.makeText(context,"Success:",Toast.LENGTH_SHORT).show()
-                }
+//                Handler(Looper.getMainLooper()).post {
+//                    layout?.visibility = View.GONE
+//                    Toast.makeText(context,"Success:",Toast.LENGTH_SHORT).show()
+//                }
                 Log.d("TEST_OF_LOADING_DATA", "Success: $it")
             }, {
-                Handler(Looper.getMainLooper()).post {
-                    layout?.visibility = View.GONE
-                    Toast.makeText(context,it.message,Toast.LENGTH_SHORT).show()
-                }
+//                Handler(Looper.getMainLooper()).post {
+//                    layout?.visibility = View.GONE
+//                    Toast.makeText(context,it.message,Toast.LENGTH_SHORT).show()
+//                }
                 Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
             })
         compositeDisposable.add(disposable)
@@ -134,12 +154,29 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun refreshData(layout: ConstraintLayout) {
-        loadData(layout)
+    fun refreshData(srlMainView: SwipeRefreshLayout? = null) {
+        loadData(srlMainView)
     }
 
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.dispose()
+    }
+
+    private fun splitDataToSection(list:List<Order>) : TreeMap<String, List<Order>>? {
+
+        val treeMap : TreeMap<String, List<Order>> = TreeMap()
+
+        val listOnDelivery:List<Order>  = list.filter { !it.isCancelled && !it.isDelivered }
+        val listOrderToReturn:List<Order>   = list.filter { it.isCancelled || it.isDelivered }
+
+        if (listOrderToReturn.isNotEmpty())
+            treeMap[context.resources.getString(R.string.order_to_return)]      = listOrderToReturn
+        if (listOnDelivery.isNotEmpty())
+            treeMap[context.resources.getString(R.string.order_on_delivery)]    = listOnDelivery
+
+
+        return treeMap
+
     }
 }
