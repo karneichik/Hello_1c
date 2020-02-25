@@ -1,7 +1,11 @@
 package by.karneichik.DeliveryService
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
+import androidx.preference.PreferenceManager
+import by.karneichik.DeliveryService.api.ApiFactory
+import by.karneichik.DeliveryService.helpers.PrefHelper
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -33,9 +37,15 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+
         getSharedPreferences("_", Context.MODE_PRIVATE).edit().putString("fb", token)
             .apply()
+
         Log.d(TAG, "New token $token")
+
+        val accessToken = PreferenceManager.getDefaultSharedPreferences(this).getString("accessToken", null) ?: return
+
+        ApiFactory.apiService.updateToken(mapOf("AccessToken" to accessToken,"FCMToken" to token))
 
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the

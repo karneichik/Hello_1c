@@ -2,6 +2,7 @@ package by.karneichik.DeliveryService
 
 import android.content.Context
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -11,6 +12,7 @@ import by.karneichik.DeliveryService.adapters.TabsPagerAdapter
 import by.karneichik.DeliveryService.helpers.PrefHelper
 import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_orders_list.*
 
@@ -24,31 +26,7 @@ class OrderListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_orders_list)
 
-        PrefHelper.init(this)
-
         viewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
-//        viewModel.orderList.observe(this, Observer { it ->
-//            val splitedDate = splitDataToSection(it)
-//            adapter.removeAllSections()
-//            for (date in splitedDate!!.entries.sortedByDescending { it.key }) {
-//
-//                val section = OrdersSection(date.value,date.key)
-//                section.onOrderClickListener = object : OrdersSection.OnOrderClickListener {
-//                    override fun onOrderClick(order: Order) {
-//                        val intent = OrderDetailActivity.newIntent(
-//                            this@OrderListActivity,
-//                            order.uid
-//                        )
-//                        startActivity(intent)
-//                    }
-//                }
-//                adapter.addSection(section)
-//            }
-
-//            adapter.notifyDataSetChanged()
-
-//        })
-
 
         srlMainView.setOnRefreshListener {
             viewModel.refreshData(srlMainView)
@@ -61,6 +39,18 @@ class OrderListActivity : AppCompatActivity() {
         view_pager.adapter = tabsPagerAdapter
         tabs.setupWithViewPager(view_pager)
 
+        AsyncTask.execute{
+
+            val fcmToken = getSharedPreferences("_", Context.MODE_PRIVATE).getString("fb",null)
+
+            if (fcmToken == null ) {
+                val token =
+                    FirebaseInstanceId.getInstance().getToken("696540481598","FCM")
+                getSharedPreferences("_", Context.MODE_PRIVATE).edit().putString("fb", token)
+                    .apply()
+            }
+
+        }
 
 //        floatingActionButton.setOnClickListener {
 //            FirebaseInstanceId.getInstance().instanceId

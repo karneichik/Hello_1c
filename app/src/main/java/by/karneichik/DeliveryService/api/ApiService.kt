@@ -16,6 +16,12 @@ interface ApiService {
             : Single<Orders>
 
     @POST("hs/delivery/get_orders")
-    fun syncOrders(@Body orders: Orders) : Call<String>
+    fun syncOrders(
+        @Body orders: Orders,
+        @HeaderMap headers: Map<String, String>
+    ) : Call<String>
+
+    @POST("hs/delivery/update_token")
+    fun updateToken(@HeaderMap headers: Map<String, String>)
 
 }

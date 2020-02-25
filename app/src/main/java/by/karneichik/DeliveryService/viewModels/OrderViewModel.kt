@@ -1,7 +1,10 @@
 package by.karneichik.DeliveryService.viewModels
 
 import android.app.Application
+import android.content.Context
 import android.os.AsyncTask
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -9,21 +12,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import by.karneichik.DeliveryService.R
 import by.karneichik.DeliveryService.api.ApiFactory
-import by.karneichik.DeliveryService.api.ApiService
 import by.karneichik.DeliveryService.database.AppDatabase
 import by.karneichik.DeliveryService.helpers.PrefHelper
 import by.karneichik.DeliveryService.pojo.Order
 import by.karneichik.DeliveryService.pojo.Orders
 import by.karneichik.DeliveryService.pojo.Product
+import com.google.firebase.iid.FirebaseInstanceId
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_orders_list.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.*
 
 
 class OrderViewModel(application: Application) : AndroidViewModel(application) {
@@ -96,12 +96,34 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun toastMessage(msg:String) {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getHeaders() : Map<String,String>? {
+
+        val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return null
+
+        val fcmToken = context.getSharedPreferences("_", Context.MODE_PRIVATE).getString("fb",null)
+
+        if (fcmToken == null) {
+            toastMessage("Токен не получен от сервера Google")
+            return null
+        }
+
+        return mapOf("AccessToken" to accessToken,"FCMToken" to fcmToken)
+    }
+
     private fun syncOrders() {
 
         val listData = db.orderInfoDao().getAllOrders()
         val listOrders = listData.map { it.order.apply { products = it.productsList } }
 
-        ApiFactory.apiService.syncOrders(Orders(listOrders)).enqueue(
+        val headers = getHeaders() ?: return
+
+        ApiFactory.apiService.syncOrders(Orders(listOrders),headers ).enqueue(
             object : Callback<String> {
                 override fun onFailure(call: Call<String>, t: Throwable) {
                     Toast.makeText(context, t.message, Toast.LENGTH_LONG).show()
@@ -122,8 +144,14 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadData(srlMainView: SwipeRefreshLayout? = null) {
 
-        val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return
-        val disposable = ApiFactory.apiService.getOrders(mapOf("AccessToken" to accessToken))
+        val headers = getHeaders()
+
+        if (headers == null) {
+            srlMainView?.isRefreshing = false
+            return
+        }
+
+        val disposable = ApiFactory.apiService.getOrders(headers)
             .map { it -> it.orders.map { it } }
             .subscribeOn(Schedulers.io())
             .doFinally{if ( srlMainView != null ) srlMainView.isRefreshing = false }
@@ -137,16 +165,8 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
                 val allProducts = it.flatMap { it.products }
                 db.orderProductsInfoDao().insertProducts(allProducts)
 
-//                Handler(Looper.getMainLooper()).post {
-//                    layout?.visibility = View.GONE
-//                    Toast.makeText(context,"Success:",Toast.LENGTH_SHORT).show()
-//                }
                 Log.d("TEST_OF_LOADING_DATA", "Success: $it")
             }, {
-//                Handler(Looper.getMainLooper()).post {
-//                    layout?.visibility = View.GONE
-//                    Toast.makeText(context,it.message,Toast.LENGTH_SHORT).show()
-//                }
                 Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
             })
         compositeDisposable.add(disposable)
@@ -163,20 +183,20 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         compositeDisposable.dispose()
     }
 
-    private fun splitDataToSection(list:List<Order>) : TreeMap<String, List<Order>>? {
-
-        val treeMap : TreeMap<String, List<Order>> = TreeMap()
-
-        val listOnDelivery:List<Order>  = list.filter { !it.isCancelled && !it.isDelivered }
-        val listOrderToReturn:List<Order>   = list.filter { it.isCancelled || it.isDelivered }
-
-        if (listOrderToReturn.isNotEmpty())
-            treeMap[context.resources.getString(R.string.order_to_return)]      = listOrderToReturn
-        if (listOnDelivery.isNotEmpty())
-            treeMap[context.resources.getString(R.string.order_on_delivery)]    = listOnDelivery
-
-
-        return treeMap
-
-    }
+//    private fun splitDataToSection(list:List<Order>) : TreeMap<String, List<Order>>? {
+//
+//        val treeMap : TreeMap<String, List<Order>> = TreeMap()
+//
+//        val listOnDelivery:List<Order>  = list.filter { !it.isCancelled && !it.isDelivered }
+//        val listOrderToReturn:List<Order>   = list.filter { it.isCancelled || it.isDelivered }
+//
+//        if (listOrderToReturn.isNotEmpty())
+//            treeMap[context.resources.getString(R.string.order_to_return)]      = listOrderToReturn
+//        if (listOnDelivery.isNotEmpty())
+//            treeMap[context.resources.getString(R.string.order_on_delivery)]    = listOnDelivery
+//
+//
+//        return treeMap
+//
+//    }
 }
