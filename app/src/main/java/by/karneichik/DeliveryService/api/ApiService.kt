@@ -22,6 +22,6 @@ interface ApiService {
     ) : Call<String>
 
     @POST("hs/delivery/update_token")
-    fun updateToken(@HeaderMap headers: Map<String, String>)
+    fun updateToken(@HeaderMap headers: Map<String, String>): Call<String>
 
 }

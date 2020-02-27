@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_on_delivery">
+
+    <fragment
+        android:id="@+id/navigation_on_delivery"
+        android:name="by.karneichik.DeliveryService.adapters.OrdersFragment"
+        android:label="@string/order_on_delivery"
+        tools:layout="@layout/fragment_main">
+        <argument
+            android:name="position"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_one"
+            app:destination="@id/navigation_on_delivery"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_to_return"
+        android:label="@string/order_to_return"
+        android:name="by.karneichik.DeliveryService.adapters.OrdersFragment"
+        tools:layout="@layout/fragment_main">
+        <argument
+            android:name="position"
+            android:defaultValue="1" />
+        <action
+            android:id="@+id/action_two"
+            app:destination="@id/navigation_to_return"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_delivered"
+        android:label="@string/order_delivered"
+        android:name="by.karneichik.DeliveryService.adapters.OrdersFragment"
+        tools:layout="@layout/fragment_main">
+        <argument
+            android:name="position"
+            android:defaultValue="2" />
+        <action
+            android:id="@+id/action_three"
+            app:destination="@id/navigation_delivered"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@id/navigation_delivered" />
+    </fragment>
+</navigation>

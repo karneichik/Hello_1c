@@ -1,0 +1,67 @@
+<!--<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="612dp"
+            android:height="614dp"
+            android:viewportWidth="612"
+            android:viewportHeight="614">
+            <path
+                android:name="path"
+                android:pathData="M 305.92 2.227 C 136.965 2.227 0 139.189 0 308.145 C 0 477.1 136.965 614.065 305.92 614.065 C 474.876 614.065 611.843 477.1 611.843 308.145 C 611.843 139.189 474.876 2.227 305.92 2.227 Z M 305.92 544.449 C 175.415 544.449 69.616 438.652 69.616 308.145 C 69.616 177.637 175.415 71.841 305.92 71.841 C 436.428 71.841 542.224 177.639 542.224 308.145 C 542.224 438.652 436.428 544.449 305.92 544.449 Z M 396.17 358.051 C 393.562 358.051 390.893 357.714 388.245 357.004 L 289.648 330.429 C 276.411 326.852 267.202 314.841 267.202 301.125 L 267.202 149.372 C 267.202 132.616 280.797 119.021 297.553 119.021 C 314.308 119.021 327.903 132.616 327.903 149.372 L 327.903 277.869 L 404.054 298.396 C 420.238 302.763 429.819 319.423 425.453 335.602 C 421.799 349.138 409.549 358.051 396.17 358.051 Z"
+                android:fillColor="#000000"
+                android:strokeWidth="1"/>
+        </vector>
+    </aapt:attr>
+    <target android:name="path">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="pathData"
+                android:duration="300"
+                android:valueFrom="M 305.92 2.227 C 136.965 2.227 0 139.189 0 308.145 C 0 477.1 136.965 614.065 305.92 614.065 C 474.876 614.065 611.843 477.1 611.843 308.145 C 611.843 139.189 474.876 2.227 305.92 2.227 Z M 305.92 544.449 C 175.415 544.449 69.616 438.652 69.616 308.145 C 69.616 177.637 175.415 71.841 305.92 71.841 C 436.428 71.841 542.224 177.639 542.224 308.145 C 542.224 438.652 436.428 544.449 305.92 544.449 Z M 396.17 358.051 C 393.562 358.051 390.893 357.714 388.245 357.004 L 289.648 330.429 C 276.411 326.852 267.202 314.841 267.202 301.125 L 267.202 149.372 C 267.202 132.616 280.797 119.021 297.553 119.021 C 314.308 119.021 327.903 132.616 327.903 149.372 L 327.903 277.869 L 404.054 298.396 C 420.238 302.763 429.819 319.423 425.453 335.602 C 421.799 349.138 409.549 358.051 396.17 358.051 Z"
+                android:valueTo="M 305.92 2.227 C 136.965 2.227 0 139.189 0 308.145 C 0 477.1 136.965 614.065 305.92 614.065 C 474.876 614.065 611.843 477.1 611.843 308.145 C 611.843 139.189 474.876 2.227 305.92 2.227 Z M 305.92 544.449 C 175.415 544.449 69.616 438.652 69.616 308.145 C 69.616 177.637 175.415 71.841 305.92 71.841 C 436.428 71.841 542.224 177.639 542.224 308.145 C 542.224 438.652 436.428 544.449 305.92 544.449 Z M 396.17 358.051 C 393.562 358.051 390.893 357.714 388.245 357.004 L 289.648 330.429 C 276.411 326.852 267.202 314.841 267.202 301.125 L 267.202 149.372 C 267.202 132.616 280.797 119.021 297.553 119.021 C 314.308 119.021 327.903 132.616 327.903 149.372 L 327.903 277.869 L 404.054 298.396 C 420.238 302.763 429.819 319.423 425.453 335.602 C 421.799 349.138 409.549 358.051 396.17 358.051 Z"
+                android:valueType="pathType"
+                android:interpolator="@android:interpolator/fast_out_slow_in"/>
+
+        </aapt:attr>
+    </target>
+
+</animated-vector>-->
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<objectAnimator
+        android:duration="250"
+        android:propertyName="alpha"
+        android:valueTo="0.5f" />-->
+    <set android:ordering="sequentially">
+
+        <objectAnimator
+            android:duration="250"
+            android:propertyName="backgroundColor"
+            android:valueFrom="@color/colorOnDelivery"
+            android:valueTo="#0f0"/>
+        <objectAnimator
+            android:duration="250"
+            android:propertyName="backgroundColor"
+            android:valueFrom="#0f0"
+            android:valueTo="@color/colorOnDelivery"/>
+    </set>
+    <set android:ordering="sequentially">
+        <objectAnimator
+            android:duration="250"
+            android:propertyName="translationY"
+            android:valueTo="-20F"
+            android:valueType="floatType"/>
+        <objectAnimator
+            android:duration="250"
+            android:propertyName="translationY"
+            android:valueTo="0"
+            android:valueType="floatType"/>
+
+    </set>
+    <!--<objectAnimator
+        android:duration="250"
+        android:propertyName="alpha"
+        android:valueTo="1f" />-->
+</set>

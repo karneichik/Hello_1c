@@ -18,7 +18,6 @@ import by.karneichik.DeliveryService.helpers.PrefHelper
 import by.karneichik.DeliveryService.pojo.Order
 import by.karneichik.DeliveryService.pojo.Orders
 import by.karneichik.DeliveryService.pojo.Product
-import com.google.firebase.iid.FirebaseInstanceId
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import retrofit2.Call

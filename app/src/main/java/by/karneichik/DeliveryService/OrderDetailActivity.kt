@@ -1,7 +1,9 @@
 package by.karneichik.DeliveryService
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -12,7 +14,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -28,6 +32,7 @@ class OrderDetailActivity : AppCompatActivity() {
     private lateinit var viewModel: OrderViewModel
     private var adapter: ProductListAdapter = ProductListAdapter(this)
     private val p = Paint()
+    private val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1111
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -74,7 +79,53 @@ class OrderDetailActivity : AppCompatActivity() {
         viewModel.getOrderInfo(uid).observe(this, Observer {
             with(it) {
                 tvClient_FIO.text = client_fio
-                tvClient_phone.text = client_phone.toString()
+                tvClient_phone.text = client_phone
+                tvClient_phone.setOnClickListener {
+                    if (ActivityCompat.checkSelfPermission(
+                            this@OrderDetailActivity,
+                            Manifest.permission.CALL_PHONE
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        AlertDialog.Builder(this@OrderDetailActivity)
+                            .setTitle(R.string.dialog_call_ttile)
+                            .setMessage(getString(R.string.dialog_call_body).format(client_phone))
+                            .setPositiveButton(R.string.yes) { _, _ ->
+                                val intentCall = Intent(Intent.ACTION_CALL);
+                                intentCall.data = Uri.parse("tel:$client_phone")
+
+                                try {
+                                    startActivity(intentCall)
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        this@OrderDetailActivity,
+                                        "Что-то пошло не так!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+
+                            }
+                            .setNegativeButton(R.string.no) {_, _ ->
+
+                            }
+                            .show()
+                    } else {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this@OrderDetailActivity,
+                                Manifest.permission.CALL_PHONE)) {
+                            // Show an explanation to the user *asynchronously* -- don't block
+                            // this thread waiting for the user's response! After the user
+                            // sees the explanation, try again to request the permission.
+                        } else {
+                            // No explanation needed, we can request the permission.
+                            ActivityCompat.requestPermissions(this@OrderDetailActivity,
+                                arrayOf(Manifest.permission.CALL_PHONE),
+                                MY_PERMISSIONS_REQUEST_READ_CONTACTS)
+
+                            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                            // app-defined int constant. The callback method gets the
+                            // result of the request.
+                        }
+                    }
+                }
                 tvAddress.text = address
                 tvAddress.setOnClickListener {
                     intent = Intent(Intent.ACTION_VIEW)
@@ -111,6 +162,29 @@ class OrderDetailActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_READ_CONTACTS -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     private fun enableSwipe() {

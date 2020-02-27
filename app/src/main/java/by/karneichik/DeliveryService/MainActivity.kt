@@ -2,11 +2,14 @@
 
 package by.karneichik.DeliveryService
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import by.karneichik.DeliveryService.helpers.PrefHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -16,14 +19,16 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_sign_in.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    val RC_SIGN_IN: Int = 1
-    lateinit var mGoogleSignInClient: GoogleSignInClient
-    lateinit var mGoogleSignInOptions: GoogleSignInOptions
+    private val RC_SIGN_IN: Int = 1
+    private val MY_PERMISSIONS_REQUEST_INTERNET: Int = 1112
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    private lateinit var mGoogleSignInOptions: GoogleSignInOptions
     private lateinit var firebaseAuth: FirebaseAuth
 
     companion object {
@@ -36,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
+            FirebaseMessaging.getInstance().isAutoInitEnabled = true
             startActivity(OrderListActivity.getLaunchIntent(this))
             finish()
         }
@@ -94,12 +100,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun signIn() {
-        val signInIntent: Intent = mGoogleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN)
+
+        if (ActivityCompat.checkSelfPermission(
+                this@MainActivity,
+                Manifest.permission.INTERNET
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val signInIntent: Intent = mGoogleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity,
+                    Manifest.permission.INTERNET)) {
+            } else {
+                ActivityCompat.requestPermissions(this@MainActivity,
+                    arrayOf(Manifest.permission.INTERNET),
+                    MY_PERMISSIONS_REQUEST_INTERNET)
+            }
+        }
+
     }
-
-
-
 
 }
 

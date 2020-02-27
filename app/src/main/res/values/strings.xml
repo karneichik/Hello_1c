@@ -27,5 +27,9 @@
     <string name="action_cancel_order">Cancel order</string>
     <string name="action_sign_out">Sign Out</string>
     <string name="order_delivered">Delivered</string>
+    <string name="dialog_call_ttile">Dial number ?</string>
+    <string name="dialog_call_body">%s will call</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

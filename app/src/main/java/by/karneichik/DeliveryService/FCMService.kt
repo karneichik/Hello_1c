@@ -1,13 +1,15 @@
 package by.karneichik.DeliveryService
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.preference.PreferenceManager
 import by.karneichik.DeliveryService.api.ApiFactory
-import by.karneichik.DeliveryService.helpers.PrefHelper
+import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class FCMService : FirebaseMessagingService() {
@@ -19,13 +21,9 @@ class FCMService : FirebaseMessagingService() {
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.from)
         // Check if message contains a data payload.
-        if (remoteMessage.data.size > 0) {
+        if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: " + remoteMessage.data)
-            if ( /* Check if data needs to be processed by long running job */true) { // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
-//                scheduleJob()
-            } else { // Handle message within 10 seconds
-//                handleNow()
-            }
+            remoteMessage.data["uid"]?.let { OrderViewModel(application).cancelOrder(it) }
         }
         // Check if message contains a notification payload.
         if (remoteMessage.notification != null) {
@@ -45,7 +43,17 @@ class FCMService : FirebaseMessagingService() {
 
         val accessToken = PreferenceManager.getDefaultSharedPreferences(this).getString("accessToken", null) ?: return
 
-        ApiFactory.apiService.updateToken(mapOf("AccessToken" to accessToken,"FCMToken" to token))
+        ApiFactory.apiService.updateToken(mapOf("AccessToken" to accessToken,"FCMToken" to token)).enqueue(
+            object:Callback<String>{
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.d(TAG, "Message data payload: ${t.message}")
+                }
+
+                override fun onResponse(call: Call<String>, response: Response<String>) {
+                    Log.d(TAG, "Message data payload: ${response.body()}")
+                }
+            }
+        )
 
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the

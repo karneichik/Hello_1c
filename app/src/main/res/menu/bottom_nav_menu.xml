@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_on_delivery"
+        android:icon="@drawable/ic_on_delivery"
+        android:title="@string/order_on_delivery" />
+
+    <item
+        android:id="@+id/navigation_to_return"
+        android:icon="@drawable/ic_to_return"
+        android:title="@string/order_to_return" />
+
+    <item
+        android:id="@+id/navigation_delivered"
+        android:icon="@drawable/ic_delivered"
+        android:title="@string/order_delivered" />
+
+</menu>

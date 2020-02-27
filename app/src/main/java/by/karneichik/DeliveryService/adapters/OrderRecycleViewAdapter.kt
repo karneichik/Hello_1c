@@ -3,7 +3,6 @@ package by.karneichik.DeliveryService.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.DeliveryService.R
 import by.karneichik.DeliveryService.pojo.Order

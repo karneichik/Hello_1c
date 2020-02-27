@@ -22,4 +22,8 @@
     <string name="action_save">Сохранить заказ</string>
     <string name="action_sign_out">Отключить Google Account</string>
     <string name="order_delivered">Доставлено</string>
+    <string name="dialog_call_ttile">Набрать номер ?</string>
+    <string name="dialog_call_body">%s будет набран</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
 </resources>
