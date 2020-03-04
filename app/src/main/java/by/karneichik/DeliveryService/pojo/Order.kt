@@ -16,12 +16,13 @@ data class Order (
     @SerializedName("totalsum") var totalsum : Double,
     @SerializedName("payform") var payform : String,
     @SerializedName("time") var time : String,
+    @SerializedName("comment") var comment : String,
     @SerializedName("isDelivered") @Expose var isDelivered : Boolean,
     @SerializedName("isCancelled") @Expose var isCancelled : Boolean,
     @Ignore @SerializedName("products") @Expose var products : List<Product>
 
 )
-{constructor(): this("", "","","","",0.0,"","", false, false,listOf())}
+{constructor(): this("", "","","","",0.0,"","", "",false, false,listOf())}
 
 @Entity(tableName = "orderProducts")
 //@Entity(tableName = "orderProducts",
@@ -32,15 +33,15 @@ data class Order (
 //            onDelete = ForeignKey.CASCADE)])
 data class Product (
 
-    @PrimaryKey(autoGenerate = true) val id : Int,
+    @PrimaryKey(autoGenerate = true) var id : Int?,
     @SerializedName("uid") @Expose val uid : String,
     @SerializedName("good_uid") @Expose val good_uid : String,
     @SerializedName("goods")@Expose val goods : String,
     @SerializedName("serial")@Expose val serial : String,
     @SerializedName("delivered")@Expose var delivered : Boolean,
     @SerializedName("price")@Expose val price : Double,
-    @SerializedName("sum")@Expose val sum : Double,
-    @SerializedName("count")@Expose val count : Int
+    @SerializedName("sum")@Expose var sum : Double,
+    @SerializedName("count")@Expose var count : Int
 )
 
 data class OrderWithProducts (

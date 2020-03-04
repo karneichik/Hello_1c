@@ -23,6 +23,9 @@ import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.math.round
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 
 class OrderViewModel(application: Application) : AndroidViewModel(application) {
@@ -31,10 +34,10 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     private val compositeDisposable = CompositeDisposable()
     private lateinit var allProducts : LiveData<List<Product>>
     private lateinit var order : LiveData<Order>
-    private lateinit var orders: LiveData<List<Order>>
     private val context = application.applicationContext
     private val _index = MutableLiveData<Int>()
     var orderList = db.orderInfoDao().getOrdersList1()
+    private var srlMainView: SwipeRefreshLayout? = null
 
     val text: LiveData<String> = Transformations.map(_index) {
         "Hello world from section: $it"
@@ -65,34 +68,160 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cancelOrder(uid:String) {
-
-        AsyncTask.execute{
-
-            val order = db.orderInfoDao().getOrderInfo(uid)
-            order.isCancelled = true
-            order.isDelivered = true
-            db.orderInfoDao().insertOrder(order)
-
-            val products = db.orderProductsInfoDao().getOrderProductsList(uid)
-            for (product in products) product.delivered = false
-            db.orderProductsInfoDao().insertProducts(products)
-
-            syncOrders()
-        }
-
+        updateOrderAndSync(uid,isCancelled = true, isDelivered = true)
     }
 
     fun saveOrder(uid:String) {
+        updateOrderAndSync(uid,isCancelled = false, isDelivered = true)
+    }
 
-        AsyncTask.execute{
+    fun splitProduct(product: Product,newCount:Int) {
+        splitProductPrivate(product,newCount)
+    }
 
-            val order = db.orderInfoDao().getOrderInfo(uid)
-            order.isDelivered = true
-            order.isCancelled = false
-            db.orderInfoDao().insertOrder(order)
+    fun refreshData(srlMainView: SwipeRefreshLayout? = null) {
+        this.srlMainView = srlMainView
+        loadData()
+    }
 
-            syncOrders()
+    fun updateToken(){
+
+        val headers = getHeaders() ?: return
+
+        val disposable = ApiFactory.apiService.updateToken(headers)
+            .subscribeOn(Schedulers.io())
+            .subscribe{ it ->
+                toastMessage(it)
+            }
+
+        compositeDisposable.add(disposable)
+
+    }
+
+    private fun splitProductPrivate(product: Product,newCount:Int) {
+        val newProduct = product.copy(
+            count = product.count - newCount,
+            id = null,
+            sum = round(100 * product.price * (product.count - newCount)) / 100
+        )
+        product.count = newCount
+        product.sum = round(100 * product.price * newCount) / 100
+
+
+        var disposable = db.orderProductsInfoDao().insertProduct(newProduct)
+            .subscribeOn(Schedulers.single())
+            .subscribe()
+        compositeDisposable.add(disposable)
+        disposable = db.orderProductsInfoDao().insertProduct(product)
+            .subscribeOn(Schedulers.single())
+            .subscribe()
+        compositeDisposable.add(disposable)
+
+
+    }
+
+    private fun getDataFromServer(headers:Map<String,String>) {
+
+        val disposable = ApiFactory.apiService.getOrders(headers)
+            .map { it -> it.orders.map { it } }
+            .subscribeOn(Schedulers.single())
+            .doFinally{srlMainView?.isRefreshing = false }
+            .subscribe({ it ->
+
+                db.orderProductsInfoDao().deleteAllProducts()
+
+                db.orderInfoDao().insertOrders(it)
+                val allProducts = it.flatMap { it.products }
+                db.orderProductsInfoDao().insertProducts(allProducts)
+
+                orderList = when (_index.value) {
+                    0-> db.orderInfoDao().getOrdersList1()
+                    1-> db.orderInfoDao().getOrdersList2()
+                    2-> db.orderInfoDao().getOrdersList3()
+                    else -> db.orderInfoDao().getOrdersList1()
+                }
+
+                Log.d("TEST_OF_LOADING_DATA", "Success: $it")
+                toastMessage("Получение данных: ОК!")
+            }, {
+                Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
+                toastMessage("Получение данных: ${it.message}")
+            })
+        compositeDisposable.add(disposable)
+    }
+
+    private fun sendData(listOrders: List<Order>,headers:Map<String,String>) {
+
+        val disposable = ApiFactory.apiService.syncOrders(Orders(listOrders),headers )
+            .subscribeOn(Schedulers.single())
+            .subscribe({
+                toastMessage("Отправка данных: $it")
+                Log.d("TEST_OF_LOADING_DATA", "Success: $it")
+                getDataFromServer(headers)
+            },{
+                toastMessage("Отправка данных: ${it.message}")
+                Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
+                srlMainView?.isRefreshing = false
+            })
+
+        compositeDisposable.add(disposable)
+    }
+
+    private fun syncOrders(headers:Map<String,String>) {
+
+        val disposable = db.orderInfoDao().getAllOrders()
+            .subscribeOn(Schedulers.single())
+            .subscribe{ listData ->
+                if (listData.isEmpty()) return@subscribe
+
+                val listOrders = listData.map { it.order.apply { products = it.productsList } }
+
+                sendData(listOrders,headers)
+
+            }
+        compositeDisposable.add(disposable)
+
+    }
+
+    private fun loadData() {
+
+        val headers = getHeaders()
+
+        if (headers == null) {
+            srlMainView?.isRefreshing = false
+            return
         }
+
+        syncOrders(headers)
+
+    }
+
+    private fun updateOrderAndSync (uid: String,isCancelled:Boolean,isDelivered:Boolean) {
+
+        val disposable = db.orderInfoDao().getOrderInfo(uid)
+            .map { it -> it.apply {
+                it.isCancelled = isCancelled
+                it.isDelivered = isDelivered
+            }}
+            .subscribeOn(Schedulers.single())
+            .doAfterSuccess { loadData() }
+            .subscribe { it ->
+
+                db.orderInfoDao().insertOrder(it)
+                val products = db.orderProductsInfoDao().getOrderProductsList(uid)
+
+                if (isCancelled) {
+                    for (product in products) product.delivered = false
+                    db.orderProductsInfoDao().insertProducts(products)
+                }
+
+            }
+        compositeDisposable.add(disposable)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
     }
 
     private fun toastMessage(msg:String) {
@@ -115,87 +244,4 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         return mapOf("AccessToken" to accessToken,"FCMToken" to fcmToken)
     }
 
-    private fun syncOrders() {
-
-        val listData = db.orderInfoDao().getAllOrders()
-        val listOrders = listData.map { it.order.apply { products = it.productsList } }
-
-        val headers = getHeaders() ?: return
-
-        ApiFactory.apiService.syncOrders(Orders(listOrders),headers ).enqueue(
-            object : Callback<String> {
-                override fun onFailure(call: Call<String>, t: Throwable) {
-                    Toast.makeText(context, t.message, Toast.LENGTH_LONG).show()
-                    Log.d("TEST_OF_LOADING_DATA", "Failure: ${t.message}")
-                }
-
-                override fun onResponse(call: Call<String>, response: Response<String>) {
-                    Toast.makeText(context, response.body().toString(), Toast.LENGTH_LONG)
-                        .show()
-                    loadData()
-                    Log.d("TEST_OF_LOADING_DATA", "Success: $response")
-
-                }
-            }
-        )
-
-    }
-
-    private fun loadData(srlMainView: SwipeRefreshLayout? = null) {
-
-        val headers = getHeaders()
-
-        if (headers == null) {
-            srlMainView?.isRefreshing = false
-            return
-        }
-
-        val disposable = ApiFactory.apiService.getOrders(headers)
-            .map { it -> it.orders.map { it } }
-            .subscribeOn(Schedulers.io())
-            .doFinally{if ( srlMainView != null ) srlMainView.isRefreshing = false }
-            .subscribe({ it ->
-
-                //TODO add sync to server
-                db.orderInfoDao().deleteAllOrders()
-                db.orderProductsInfoDao().deleteAllProducts()
-
-                db.orderInfoDao().insertOrders(it)
-                val allProducts = it.flatMap { it.products }
-                db.orderProductsInfoDao().insertProducts(allProducts)
-
-                Log.d("TEST_OF_LOADING_DATA", "Success: $it")
-            }, {
-                Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
-            })
-        compositeDisposable.add(disposable)
-
-
-    }
-
-    fun refreshData(srlMainView: SwipeRefreshLayout? = null) {
-        loadData(srlMainView)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        compositeDisposable.dispose()
-    }
-
-//    private fun splitDataToSection(list:List<Order>) : TreeMap<String, List<Order>>? {
-//
-//        val treeMap : TreeMap<String, List<Order>> = TreeMap()
-//
-//        val listOnDelivery:List<Order>  = list.filter { !it.isCancelled && !it.isDelivered }
-//        val listOrderToReturn:List<Order>   = list.filter { it.isCancelled || it.isDelivered }
-//
-//        if (listOrderToReturn.isNotEmpty())
-//            treeMap[context.resources.getString(R.string.order_to_return)]      = listOrderToReturn
-//        if (listOnDelivery.isNotEmpty())
-//            treeMap[context.resources.getString(R.string.order_on_delivery)]    = listOnDelivery
-//
-//
-//        return treeMap
-//
-//    }
 }

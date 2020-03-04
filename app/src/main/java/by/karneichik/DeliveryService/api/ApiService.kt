@@ -3,6 +3,7 @@ package by.karneichik.DeliveryService.api
 import by.karneichik.DeliveryService.pojo.Orders
 import io.reactivex.Single
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.HeaderMap
@@ -19,9 +20,9 @@ interface ApiService {
     fun syncOrders(
         @Body orders: Orders,
         @HeaderMap headers: Map<String, String>
-    ) : Call<String>
+    ) : Single<String>
 
     @POST("hs/delivery/update_token")
-    fun updateToken(@HeaderMap headers: Map<String, String>): Call<String>
+    fun updateToken(@HeaderMap headers: Map<String, String>): Single<String>
 
 }

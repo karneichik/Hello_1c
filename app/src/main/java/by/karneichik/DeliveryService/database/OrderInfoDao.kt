@@ -6,6 +6,8 @@ import androidx.room.*
 import by.karneichik.DeliveryService.pojo.Order
 import by.karneichik.DeliveryService.pojo.OrderWithProducts
 import by.karneichik.DeliveryService.pojo.Product
+import io.reactivex.Observable
+import io.reactivex.Single
 
 
 @Dao
@@ -30,11 +32,11 @@ interface OrderInfoDao {
     fun getOrderInfoLiveDate(uid: String): LiveData<Order>
 
     @Query("SELECT * FROM orders WHERE uid == :uid")
-    fun getOrderInfo(uid: String): Order
+    fun getOrderInfo(uid: String): Single<Order>
 
     @Transaction
     @Query("SELECT * FROM orders")
-    fun getAllOrders(): List<OrderWithProducts>
+    fun getAllOrders(): Single<List<OrderWithProducts>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertOrders(orderList: List<Order>)
@@ -59,7 +61,7 @@ interface OrderProductsInfoDao {
     fun insertProducts(productList: List<Product>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProduct(productList: Product)
+    fun insertProduct(productList: Product) : Single<Unit>
 
     @Query("DELETE FROM orderProducts")
     fun deleteAllProducts()

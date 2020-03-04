@@ -2,6 +2,7 @@ package by.karneichik.DeliveryService
 
 import android.Manifest
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -13,6 +14,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.DeliveryService.adapters.ProductListAdapter
+import by.karneichik.DeliveryService.pojo.Product
 import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import kotlinx.android.synthetic.main.activity_order_detail.*
 
@@ -140,20 +143,43 @@ class OrderDetailActivity : AppCompatActivity() {
                 tvTotalSum.text = totalsum.toString()
                 tvPayForm.text = payform
                 tvTime.text = time
-//                tvNumber.text = number
+                tvComment.text = comment
                 supportActionBar?.title = number
             }
         })
 
-//        val adapter = ProductListAdapter(this)
         rvProductList.adapter = adapter
 
         viewModel.getProductsList(uid).observe(this, Observer {
             adapter.productInfoList = it
         })
-//        productsViewModel.getOrderInfo(uid).observe(this, Observer {
-//            adapter.productInfoList = it.productsList
-//        })
+
+        adapter.onProductUngroupClickListener = object : ProductListAdapter.OnProductUngroupClickListener {
+            override fun onProductUngroupClick(product: Product) {
+
+                if (product.count == 2) {
+                    viewModel.splitProduct(product,1)
+                    return
+                }
+
+                val numberPicker = NumberPicker(this@OrderDetailActivity)
+                numberPicker.minValue = 1
+                numberPicker.maxValue = product.count - 1
+
+                val dialog = AlertDialog.Builder(this@OrderDetailActivity)
+                    .setView(numberPicker)
+                    .setTitle(R.string.split_count_title)
+                    .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
+                        viewModel.splitProduct(product,numberPicker.value)
+                    }
+                    .setNegativeButton("Отмена") { _: DialogInterface, _: Int ->
+                    }
+                    .create()
+
+                dialog.show()
+
+            }
+        }
 
         enableSwipe()
 

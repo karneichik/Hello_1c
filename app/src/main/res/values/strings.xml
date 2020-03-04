@@ -31,5 +31,8 @@
     <string name="dialog_call_body">%s will call</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="client_comment">Comment:</string>
+    <string name="product_ungroup" translatable="false">ungroup</string>
+    <string name="split_count_title">Specify new count</string>
 
 </resources>

@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.DeliveryService.R
 import by.karneichik.DeliveryService.pojo.Product
+import kotlinx.android.synthetic.main.activity_order_detail.view.*
 import kotlinx.android.synthetic.main.item_product_info.view.*
 
 class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<ProductListAdapter.ProductViewHolder>() {
+
+    var onProductUngroupClickListener: ProductListAdapter.OnProductUngroupClickListener? = null
 
     var productInfoList: List<Product> = listOf()
         set(value) {
@@ -20,12 +23,6 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
     fun itemUpdate() {
         notifyDataSetChanged()
     }
-//    fun removeItem(model: Product, position: Int) {
-//        notifyDataSetChanged()
-//    }
-//    fun removeItem(model: Product, position: Int) {
-//        notifyDataSetChanged()
-//    }
 
     fun getProduct(position: Int) = productInfoList[position]
 
@@ -53,6 +50,15 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
 
                 isDelivered = delivered
 
+                if (count > 1) {
+                    ivUngroup.visibility = View.VISIBLE
+                    ivUngroup.setOnClickListener{
+                        onProductUngroupClickListener?.onProductUngroupClick(this)
+                    }
+                } else {
+                    ivUngroup.visibility = View.GONE
+                }
+
                 if (serial != "") tvSerial.text = serial else tvSerial.visibility = View.GONE
 
             }
@@ -66,10 +72,11 @@ class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<Pr
         val tvPrice = itemView.tvPrice
         val tvSum = itemView.tvSum
         val lProductItem = itemView.lProductItem
+        val ivUngroup = itemView.ungroup
         var isDelivered : Boolean = true
     }
 
-//    interface OnOrderClickListener {
-//        fun onOrderClick(order: Order)
-//    }
+    interface OnProductUngroupClickListener {
+        fun onProductUngroupClick(product: Product)
+    }
 }

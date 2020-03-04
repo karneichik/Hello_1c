@@ -26,4 +26,6 @@
     <string name="dialog_call_body">%s будет набран</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
+    <string name="client_comment">Инфо по доставке:</string>
+    <string name="split_count_title">Укажите кол-во для новой строки</string>
 </resources>

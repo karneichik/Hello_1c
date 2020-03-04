@@ -19,6 +19,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import by.karneichik.DeliveryService.api.ApiFactory
 import by.karneichik.DeliveryService.helpers.PrefHelper
+import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.android.synthetic.main.activity_orders_list.*
@@ -29,25 +30,15 @@ import retrofit2.Response
 
 class OrderListActivity : AppCompatActivity() {
 
+    private lateinit var orderViewModel : OrderViewModel
+
     private fun onSelectAnimation (view: View) {
         (AnimatorInflater.loadAnimator(this, R.animator.avd_anim) as AnimatorSet).apply {
             setTarget(view)
             start()
         }
-//        view.animate()
-//            .translationY(-10F)
-//            .rotationBy(360f)
-//            .setDuration(1000)
-//            .start()
     }
 
-    private fun onReselectAnimation (view: View) {
-        view.animate()
-            .translationY(10F)
-            .rotationBy(-360f)
-            .setDuration(1000)
-            .start()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,35 +70,16 @@ class OrderListActivity : AppCompatActivity() {
             return@setOnNavigationItemSelectedListener true
         }
 
-
+        orderViewModel = OrderViewModel(application)
 
         AsyncTask.execute{
             val fcmToken = getSharedPreferences("_", Context.MODE_PRIVATE).getString("fb",null)
             val token = FirebaseInstanceId.getInstance().getToken("696540481598","FCM") ?: return@execute
 
             if (fcmToken != token ) {
-
-                getSharedPreferences("_", Context.MODE_PRIVATE).edit().putString("fb", token).apply()
-
-                val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return@execute
-
-                ApiFactory.apiService.updateToken(mapOf("AccessToken" to accessToken,"FCMToken" to token)).enqueue(
-                    object : Callback<String> {
-                        override fun onFailure(call: Call<String>, t: Throwable) {
-                            Toast.makeText(this@OrderListActivity, t.message, Toast.LENGTH_LONG).show()
-                            Log.d("TEST_OF_LOADING_DATA", "Failure: ${t.message}")
-                        }
-
-                        override fun onResponse(call: Call<String>, response: Response<String>) {
-                            Toast.makeText(this@OrderListActivity, response.body().toString(), Toast.LENGTH_LONG)
-                                .show()
-                            Log.d("TEST_OF_LOADING_DATA", "Success: $response")
-
-                        }
-
-
-                    }
-                )
+                getSharedPreferences("_", Context.MODE_PRIVATE).edit().putString("fb", token)
+                    .apply()
+                orderViewModel.updateToken()
             }
         }
     }

@@ -41,26 +41,7 @@ class FCMService : FirebaseMessagingService() {
 
         Log.d(TAG, "New token $token")
 
-        val accessToken = PreferenceManager.getDefaultSharedPreferences(this).getString("accessToken", null) ?: return
-
-        ApiFactory.apiService.updateToken(mapOf("AccessToken" to accessToken,"FCMToken" to token)).enqueue(
-            object:Callback<String>{
-                override fun onFailure(call: Call<String>, t: Throwable) {
-                    Log.d(TAG, "Message data payload: ${t.message}")
-                }
-
-                override fun onResponse(call: Call<String>, response: Response<String>) {
-                    Log.d(TAG, "Message data payload: ${response.body()}")
-                }
-            }
-        )
-
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
-//        sendRegistrationToServer(token)
-
-
+        OrderViewModel(application).updateToken()
     }
 
 
