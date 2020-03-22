@@ -44,12 +44,12 @@ class OrderDetailActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
         return when (item.itemId) {
             R.id.action_save -> {
 
                 Toast.makeText(this@OrderDetailActivity, R.string.action_save, Toast.LENGTH_SHORT)
                     .show()
+                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
                 viewModel.saveOrder(uid)
                 finish()
                 true
@@ -58,6 +58,7 @@ class OrderDetailActivity : AppCompatActivity() {
             R.id.action_cancel_order -> {
                 Toast.makeText(this@OrderDetailActivity, R.string.action_cancel_order, Toast.LENGTH_SHORT)
                     .show()
+                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
                 viewModel.cancelOrder(uid)
                 finish()
                 true

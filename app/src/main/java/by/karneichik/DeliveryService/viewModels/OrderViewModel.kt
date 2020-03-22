@@ -2,7 +2,6 @@ package by.karneichik.DeliveryService.viewModels
 
 import android.app.Application
 import android.content.Context
-import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -20,12 +19,7 @@ import by.karneichik.DeliveryService.pojo.Orders
 import by.karneichik.DeliveryService.pojo.Product
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import kotlin.math.round
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 
 class OrderViewModel(application: Application) : AndroidViewModel(application) {
@@ -161,7 +155,6 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
             },{
                 toastMessage("Отправка данных: ${it.message}")
                 Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
-                srlMainView?.isRefreshing = false
             })
 
         compositeDisposable.add(disposable)
@@ -193,6 +186,9 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         syncOrders(headers)
+        getDataFromServer(headers)
+
+        srlMainView?.isRefreshing = false
 
     }
 

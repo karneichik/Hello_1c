@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import by.karneichik.DeliveryService.R
 import by.karneichik.DeliveryService.pojo.Product
-import kotlinx.android.synthetic.main.activity_order_detail.view.*
 import kotlinx.android.synthetic.main.item_product_info.view.*
 
 class ProductListAdapter(private val context: Context) : RecyclerView.Adapter<ProductListAdapter.ProductViewHolder>() {

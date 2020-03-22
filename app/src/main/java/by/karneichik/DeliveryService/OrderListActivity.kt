@@ -6,26 +6,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import by.karneichik.DeliveryService.api.ApiFactory
-import by.karneichik.DeliveryService.helpers.PrefHelper
 import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.android.synthetic.main.activity_orders_list.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 class OrderListActivity : AppCompatActivity() {

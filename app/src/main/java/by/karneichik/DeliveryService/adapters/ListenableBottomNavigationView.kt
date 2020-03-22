@@ -11,7 +11,7 @@ class ListenableBottomNavigationView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : BottomNavigationView(context, attrs, defStyleAttr),
-    BottomNavigationView.OnNavigationItemSelectedListener {
+    OnNavigationItemSelectedListener {
 
     private val onNavigationItemSelectedListeners = mutableListOf<OnNavigationItemSelectedListener>()
 

@@ -6,7 +6,6 @@ import androidx.room.*
 import by.karneichik.DeliveryService.pojo.Order
 import by.karneichik.DeliveryService.pojo.OrderWithProducts
 import by.karneichik.DeliveryService.pojo.Product
-import io.reactivex.Observable
 import io.reactivex.Single
 
 

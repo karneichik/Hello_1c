@@ -2,14 +2,9 @@ package by.karneichik.DeliveryService
 
 import android.content.Context
 import android.util.Log
-import androidx.preference.PreferenceManager
-import by.karneichik.DeliveryService.api.ApiFactory
 import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 class FCMService : FirebaseMessagingService() {
