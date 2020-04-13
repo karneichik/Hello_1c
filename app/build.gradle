@@ -15,8 +15,8 @@ android {
         applicationId "by.karneichik.DeliveryService"
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 5
-        versionName "0.0.3"
+        versionCode 6
+        versionName "0.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments = [:]
 
@@ -55,11 +55,11 @@ dependencies {
 
 //    implementation 'com.google.firebase:firebase-analytics:17.2.2'
 //    implementation 'com.google.firebase:firebase-core:17.2.2'
-    implementation 'com.google.firebase:firebase-auth:19.2.0'
-    implementation 'com.google.firebase:firebase-messaging:20.1.1'
+    implementation 'com.google.firebase:firebase-auth:19.3.0'
+    implementation 'com.google.firebase:firebase-messaging:20.1.5'
 
     //play service auth
-    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
@@ -85,7 +85,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.2.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.2.1'
 
-    def room_version = "2.2.4"
+    def room_version = "2.2.5"
 
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-rxjava2:$room_version"

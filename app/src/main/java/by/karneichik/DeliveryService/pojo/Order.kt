@@ -19,18 +19,13 @@ data class Order (
     @SerializedName("comment") var comment : String,
     @SerializedName("isDelivered") @Expose var isDelivered : Boolean,
     @SerializedName("isCancelled") @Expose var isCancelled : Boolean,
-    @Ignore @SerializedName("products") @Expose var products : List<Product>
+    @Ignore @SerializedName("products") @Expose var products : List<Product>,
+    @SerializedName("modified") @Expose var modified : Boolean = false
 
 )
 {constructor(): this("", "","","","",0.0,"","", "",false, false,listOf())}
 
 @Entity(tableName = "orderProducts")
-//@Entity(tableName = "orderProducts",
-//    foreignKeys = [
-//        ForeignKey(entity = Product::class,
-//            parentColumns = ["uid"],
-//            childColumns = ["uid"],
-//            onDelete = ForeignKey.CASCADE)])
 data class Product (
 
     @PrimaryKey(autoGenerate = true) var id : Int?,
@@ -51,6 +46,4 @@ data class OrderWithProducts (
         entity = Product::class,
         entityColumn = "uid")
     val productsList: List<Product>
-
-
 )

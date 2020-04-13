@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import by.karneichik.DeliveryService.pojo.Order
 import by.karneichik.DeliveryService.pojo.Product
 
-@Database(entities = [Order::class, Product::class], version = 11, exportSchema = false)
+@Database(entities = [Order::class, Product::class], version = 12, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     companion object {
 

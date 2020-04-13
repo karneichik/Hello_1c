@@ -1,6 +1,9 @@
 package by.karneichik.DeliveryService
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -18,6 +21,7 @@ import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -35,7 +39,8 @@ class OrderDetailActivity : AppCompatActivity() {
     private lateinit var viewModel: OrderViewModel
     private var adapter: ProductListAdapter = ProductListAdapter(this)
     private val p = Paint()
-    private val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1111
+    private val myPermissionsRequestReadContacts = 1111
+    private lateinit var uid: String
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -49,8 +54,8 @@ class OrderDetailActivity : AppCompatActivity() {
 
                 Toast.makeText(this@OrderDetailActivity, R.string.action_save, Toast.LENGTH_SHORT)
                     .show()
-                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
-                viewModel.saveOrder(uid)
+//                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
+                viewModel.saveOrder()
                 finish()
                 true
 
@@ -58,8 +63,8 @@ class OrderDetailActivity : AppCompatActivity() {
             R.id.action_cancel_order -> {
                 Toast.makeText(this@OrderDetailActivity, R.string.action_cancel_order, Toast.LENGTH_SHORT)
                     .show()
-                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
-                viewModel.cancelOrder(uid)
+//                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
+                viewModel.cancelOrder()
                 finish()
                 true
             }
@@ -67,93 +72,149 @@ class OrderDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun showPreCallDialog(client_phone:String) {
+        if (ActivityCompat.checkSelfPermission(
+                this@OrderDetailActivity,
+                Manifest.permission.CALL_PHONE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+        AlertDialog.Builder(this@OrderDetailActivity)
+            .setTitle(R.string.dialog_call_ttile)
+            .setMessage(getString(R.string.dialog_call_body).format(client_phone))
+            .setPositiveButton(R.string.yes) { _, _ ->
+                val intentCall = Intent(Intent.ACTION_CALL)
+                intentCall.data = Uri.parse("tel:$client_phone")
+
+                try {
+                    startActivity(intentCall)
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@OrderDetailActivity,
+                        "Что-то пошло не так!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            .setNegativeButton(R.string.no) { _, _ -> }
+            .show()
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this@OrderDetailActivity,
+                    Manifest.permission.CALL_PHONE)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this@OrderDetailActivity,
+                    arrayOf(Manifest.permission.CALL_PHONE),
+                    myPermissionsRequestReadContacts)
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_detail)
 
-        supportActionBar?.let { it.setDisplayHomeAsUpEnabled(true) }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (!intent.hasExtra(EXTRA_UID_ORDER)) {
             finish()
             return
         }
-        val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
+        uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
 
         viewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
+        viewModel.getProductsList(uid).observe(this, Observer {
+            adapter.productInfoList = it
+        })
         viewModel.getOrderInfo(uid).observe(this, Observer {
+
             with(it) {
                 tvClient_FIO.text = client_fio
                 tvClient_phone.text = client_phone
-                tvClient_phone.setOnClickListener {
-                    if (ActivityCompat.checkSelfPermission(
-                            this@OrderDetailActivity,
-                            Manifest.permission.CALL_PHONE
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        AlertDialog.Builder(this@OrderDetailActivity)
-                            .setTitle(R.string.dialog_call_ttile)
-                            .setMessage(getString(R.string.dialog_call_body).format(client_phone))
-                            .setPositiveButton(R.string.yes) { _, _ ->
-                                val intentCall = Intent(Intent.ACTION_CALL);
-                                intentCall.data = Uri.parse("tel:$client_phone")
-
-                                try {
-                                    startActivity(intentCall)
-                                } catch (e: Exception) {
-                                    Toast.makeText(
-                                        this@OrderDetailActivity,
-                                        "Что-то пошло не так!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-
-                            }
-                            .setNegativeButton(R.string.no) {_, _ ->
-
-                            }
-                            .show()
-                    } else {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this@OrderDetailActivity,
-                                Manifest.permission.CALL_PHONE)) {
-                            // Show an explanation to the user *asynchronously* -- don't block
-                            // this thread waiting for the user's response! After the user
-                            // sees the explanation, try again to request the permission.
-                        } else {
-                            // No explanation needed, we can request the permission.
-                            ActivityCompat.requestPermissions(this@OrderDetailActivity,
-                                arrayOf(Manifest.permission.CALL_PHONE),
-                                MY_PERMISSIONS_REQUEST_READ_CONTACTS)
-
-                            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                            // app-defined int constant. The callback method gets the
-                            // result of the request.
-                        }
-                    }
-                }
                 tvAddress.text = address
-                tvAddress.setOnClickListener {
-                    intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("yandexnavi://map_search").buildUpon().appendQueryParameter("text", address).build()
-                    try {
-                        startActivity(intent)
-                    } catch (e:Exception) {
-                        Toast.makeText(this@OrderDetailActivity,"Яндекс Навигатор не установлен",Toast.LENGTH_LONG).show()
-                    }
-
-                }
-                tvTotalSum.text = totalsum.toString()
+//                tvTotalSum.text = totalsum.toString()
                 tvPayForm.text = payform
                 tvTime.text = time
                 tvComment.text = comment
                 supportActionBar?.title = number
+                tvClient_phone.setOnClickListener {
+                    if (client_phone.contains(";")) {
+                        val listPhone = client_phone.split(";")
+                        AlertDialog.Builder(this@OrderDetailActivity)
+                            .setTitle(R.string.dialog_call_select_title)
+                            .setSingleChoiceItems(listPhone.toTypedArray(), -1) { _, which ->
+                                showPreCallDialog(listPhone[which])
+                            }
+                            .show()
+
+                    } else {
+                        showPreCallDialog(client_phone)
+                    }
+
+                }
+                tvAddress.setOnClickListener {
+                    intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse("yandexnavi://map_search").buildUpon()
+                        .appendQueryParameter("text", address).build()
+                    try {
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            this@OrderDetailActivity,
+                            "Яндекс Навигатор не установлен",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                }
+
+                val fadeIn = ObjectAnimator.ofFloat(tvTotalSum, "alpha", 0f, 1f).apply {
+                    duration = 1000
+                }
+
+                val fadeOut = ObjectAnimator.ofFloat(tvTotalSum, "alpha", 1f, 0f).apply {
+                    duration = 1000
+                }
+
+                val moveIn = ObjectAnimator.ofFloat(tvTotalSum, "translationY", -100F,0F).apply {
+                    duration = 1000
+                }
+                
+                AnimatorSet().apply {
+                    play(fadeOut)
+                    tvTotalSum.text = totalsum.toString()
+                    play(fadeIn).with(moveIn)
+                    start()
+                }
+
+
             }
+//
+//
+////            val swipeOut = ObjectAnimator.ofFloat(tvTotalSum, "translationY",100F,0F).apply{
+////                duration = 100
+////            }
+////            val swipeIn = ObjectAnimator.ofFloat(tvTotalSum, "translationY",0F,100F).apply{
+////                duration = 100
+////            }
+//
+//
+//
+//            AnimatorSet().apply {
+//                play(fadeIn).before(fadeOut)
+////                play(swipeIn).before(swipeOut)
+//                start()
+//            }
         })
+
 
         rvProductList.adapter = adapter
-
-        viewModel.getProductsList(uid).observe(this, Observer {
-            adapter.productInfoList = it
-        })
 
         adapter.onProductUngroupClickListener = object : ProductListAdapter.OnProductUngroupClickListener {
             override fun onProductUngroupClick(product: Product) {
@@ -191,28 +252,29 @@ class OrderDetailActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            MY_PERMISSIONS_REQUEST_READ_CONTACTS -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return
-            }
-
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
-            else -> {
-                // Ignore all other requests.
-            }
-        }
-    }
+//    override fun onRequestPermissionsResult(requestCode: Int,
+//                                            permissions: Array<String>, grantResults: IntArray) {
+//        when (requestCode) {
+//            MY_PERMISSIONS_REQUEST_READ_CONTACTS -> {
+//                // If request is cancelled, the result arrays are empty.
+//                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+//                    // permission was granted, yay! Do the
+//                    // contacts-related task you need to do.
+//                }
+//                else {
+//                    // permission denied, boo! Disable the
+//                    // functionality that depends on this permission.
+//                }
+//                return
+//            }
+//
+//            // Add other 'when' lines to check for other
+//            // permissions this app might request.
+//            else -> {
+//                // Ignore all other requests.
+//            }
+//        }
+//    }
 
     private fun enableSwipe() {
         val simpleItemTouchCallback =
@@ -234,6 +296,7 @@ class OrderDetailActivity : AppCompatActivity() {
 
                     AsyncTask.execute {
                         viewModel.updateProduct(product)
+                        viewModel.recalculateTotal()
                     }
                     adapter.itemUpdate()
 
@@ -275,13 +338,13 @@ class OrderDetailActivity : AppCompatActivity() {
                                 RectF(itemView.left.toFloat(), itemView.top.toFloat(), dX, itemView.bottom.toFloat())
                             c.drawRect(background, p)
 //                            icon = getBitmapFromVectorDrawable( this@OrderDetailActivity, R.drawable.ic_clear_24px)
-                            val icon_dest = RectF(
+                            val iconDest = RectF(
                                 itemView.left.toFloat() + width,
                                 itemView.top.toFloat() + width,
                                 itemView.left.toFloat() + 2 * width,
                                 itemView.bottom.toFloat() - width
                             )
-                            c.drawBitmap(icon, null, icon_dest, p)
+                            c.drawBitmap(icon, null, iconDest, p)
                         } else {
 //                            p.color = this@OrderDetailActivity.getColor(R.color.colorPrimaryDark)
                             val background = RectF(
@@ -292,13 +355,13 @@ class OrderDetailActivity : AppCompatActivity() {
                             )
                             c.drawRect(background, p)
 //                            icon = getBitmapFromVectorDrawable(this@OrderDetailActivity, R.drawable.ic_add_24px)
-                            val icon_dest = RectF(
+                            val iconDest = RectF(
                                 itemView.right.toFloat() - 2 * width,
                                 itemView.top.toFloat() + width,
                                 itemView.right.toFloat() - width,
                                 itemView.bottom.toFloat() - width
                             )
-                            c.drawBitmap(icon, null, icon_dest, p)
+                            c.drawBitmap(icon, null, iconDest, p)
                         }
                     }
                     super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)

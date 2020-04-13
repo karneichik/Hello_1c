@@ -14,6 +14,13 @@ interface OrderInfoDao {
     @Query("SELECT * FROM orders ORDER BY number DESC")
     fun getOrdersList(): LiveData<List<Order>>
 
+    @Transaction
+    @Query("SELECT * FROM orders WHERE modified")
+    fun getModifiedOrdersList(): Single<List<OrderWithProducts>>
+
+    @Query("UPDATE orders SET modified = :modified WHERE uid == :uid")
+    fun setModified(uid: String,modified: Boolean)
+
     @Query("SELECT * FROM orders WHERE isCancelled = 0 and isDelivered = 0 ORDER BY number DESC")
     fun getOrdersList1(): LiveData<List<Order>>
     @Query("SELECT DISTINCT orders.* FROM orders LEFT JOIN orderProducts ON orders.uid = orderProducts.uid " +
@@ -60,7 +67,7 @@ interface OrderProductsInfoDao {
     fun insertProducts(productList: List<Product>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProduct(productList: Product) : Single<Unit>
+    fun insertProduct(productList: Product)
 
     @Query("DELETE FROM orderProducts")
     fun deleteAllProducts()

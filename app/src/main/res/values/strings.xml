@@ -34,5 +34,6 @@
     <string name="client_comment">Comment:</string>
     <string name="product_ungroup" translatable="false">ungroup</string>
     <string name="split_count_title">Specify new count</string>
+    <string name="dialog_call_select_title">Select phone to call</string>
 
 </resources>

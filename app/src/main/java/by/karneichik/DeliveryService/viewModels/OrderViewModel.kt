@@ -2,6 +2,7 @@ package by.karneichik.DeliveryService.viewModels
 
 import android.app.Application
 import android.content.Context
+import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -9,15 +10,17 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import by.karneichik.DeliveryService.api.ApiFactory
 import by.karneichik.DeliveryService.database.AppDatabase
 import by.karneichik.DeliveryService.helpers.PrefHelper
 import by.karneichik.DeliveryService.pojo.Order
+import by.karneichik.DeliveryService.pojo.OrderWithProducts
 import by.karneichik.DeliveryService.pojo.Orders
 import by.karneichik.DeliveryService.pojo.Product
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlin.math.round
 
@@ -32,10 +35,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     private val _index = MutableLiveData<Int>()
     var orderList = db.orderInfoDao().getOrdersList1()
     private var srlMainView: SwipeRefreshLayout? = null
-
-    val text: LiveData<String> = Transformations.map(_index) {
-        "Hello world from section: $it"
-    }
+    private lateinit var headers:Map<String,String>
 
     fun setIndex(index: Int) {
         _index.value = index
@@ -45,6 +45,38 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
             2-> db.orderInfoDao().getOrdersList3()
             else -> db.orderInfoDao().getOrdersList1()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
+    }
+
+    private fun toastMessage(msg:String) {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getHeaders() : Map<String, String>? {
+
+        val accessToken = PrefHelper.preferences.getString("accessToken", null) //?: return null
+
+        if (accessToken.isNullOrEmpty()) {
+            toastMessage("Не заполнены настройки")
+            srlMainView?.isRefreshing = false
+            return null
+        }
+
+        val fcmToken = context.getSharedPreferences("_", Context.MODE_PRIVATE).getString("fb",null)
+
+        if (fcmToken.isNullOrEmpty()) {
+            toastMessage("Токен не получен от сервера Google")
+            srlMainView?.isRefreshing = false
+            return null
+        }
+
+        return mapOf("AccessToken" to accessToken,"FCMToken" to fcmToken)
     }
 
     fun getOrderInfo(uid: String): LiveData<Order> {
@@ -61,12 +93,38 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         db.orderProductsInfoDao().insertProduct(product)
     }
 
-    fun cancelOrder(uid:String) {
-        updateOrderAndSync(uid,isCancelled = true, isDelivered = true)
+    private fun getModifiedOrders() : Single<List<OrderWithProducts>> = db.orderInfoDao().getModifiedOrdersList()
+
+    fun cancelOrder(uid: String? = null) {
+
+        if (uid != null) order = db.orderInfoDao().getOrderInfoLiveDate(uid)
+
+        with(order.value) {
+            this?.modified = true
+            this?.isDelivered = true
+            this?.isCancelled = true
+        }
+        val orderToSent = order.value
+        orderToSent.apply {
+            this?.products = allProducts.value!!
+        }
+
+        sendData(orderToSent)
+//        updateOrder(uid,isCancelled = true, isDelivered = true)
     }
 
-    fun saveOrder(uid:String) {
-        updateOrderAndSync(uid,isCancelled = false, isDelivered = true)
+    fun saveOrder() {
+        with(order.value) {
+            this?.modified = true
+            this?.isDelivered = true
+            this?.isCancelled = false
+        }
+        val orderToSent = order.value
+        orderToSent.apply {
+            this?.products = allProducts.value!!
+        }
+        sendData(orderToSent)
+//        updateOrder(uid,isCancelled = false, isDelivered = true)
     }
 
     fun splitProduct(product: Product,newCount:Int) {
@@ -75,21 +133,31 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
     fun refreshData(srlMainView: SwipeRefreshLayout? = null) {
         this.srlMainView = srlMainView
-        loadData()
+        updateOrders()
     }
 
     fun updateToken(){
 
-        val headers = getHeaders() ?: return
+        headers = getHeaders() ?: return
 
         val disposable = ApiFactory.apiService.updateToken(headers)
             .subscribeOn(Schedulers.io())
-            .subscribe{ it ->
-                toastMessage(it)
+            .subscribe{ message ->
+                toastMessage(message)
             }
 
         compositeDisposable.add(disposable)
 
+    }
+
+    fun recalculateTotal() {
+
+        val products = allProducts.value
+        val filteredList = products?.filter { it.delivered}
+        order.value?.totalsum = filteredList?.sumByDouble { it.sum } ?:0.0
+        if (order.value != null) {
+            db.orderInfoDao().insertOrder(order.value as Order)
+        }
     }
 
     private fun splitProductPrivate(product: Product,newCount:Int) {
@@ -101,143 +169,105 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         product.count = newCount
         product.sum = round(100 * product.price * newCount) / 100
 
-
-        var disposable = db.orderProductsInfoDao().insertProduct(newProduct)
-            .subscribeOn(Schedulers.single())
-            .subscribe()
-        compositeDisposable.add(disposable)
-        disposable = db.orderProductsInfoDao().insertProduct(product)
-            .subscribeOn(Schedulers.single())
-            .subscribe()
-        compositeDisposable.add(disposable)
-
+        AsyncTask.execute {
+            db.orderProductsInfoDao().insertProduct(newProduct)
+            db.orderProductsInfoDao().insertProduct(product)
+        }
 
     }
 
-    private fun getDataFromServer(headers:Map<String,String>) {
+    private fun updateOrders() {
 
-        val disposable = ApiFactory.apiService.getOrders(headers)
-            .map { it -> it.orders.map { it } }
-            .subscribeOn(Schedulers.single())
-            .doFinally{srlMainView?.isRefreshing = false }
-            .subscribe({ it ->
+        headers = getHeaders() ?: return
 
-                db.orderProductsInfoDao().deleteAllProducts()
+        val disposable =  getModifiedOrders()
+            .subscribeOn(Schedulers.io())
+            .subscribe({ modifiedOrders ->
 
-                db.orderInfoDao().insertOrders(it)
-                val allProducts = it.flatMap { it.products }
-                db.orderProductsInfoDao().insertProducts(allProducts)
-
-                orderList = when (_index.value) {
-                    0-> db.orderInfoDao().getOrdersList1()
-                    1-> db.orderInfoDao().getOrdersList2()
-                    2-> db.orderInfoDao().getOrdersList3()
-                    else -> db.orderInfoDao().getOrdersList1()
+                val listOrders = modifiedOrders.map { owp ->
+                    owp.order.apply {
+                        products = owp.productsList
+                    }
                 }
+                sendData(listOrders)
 
-                Log.d("TEST_OF_LOADING_DATA", "Success: $it")
-                toastMessage("Получение данных: ОК!")
             }, {
                 Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
-                toastMessage("Получение данных: ${it.message}")
+                toastMessage("Обмен данными: ${it.message}")
             })
+
+
+
         compositeDisposable.add(disposable)
+
     }
 
-    private fun sendData(listOrders: List<Order>,headers:Map<String,String>) {
+    private fun updateOrdersDB(listOrders: List<Order>) {
+        db.orderProductsInfoDao().deleteAllProducts()
 
-        val disposable = ApiFactory.apiService.syncOrders(Orders(listOrders),headers )
-            .subscribeOn(Schedulers.single())
+        db.orderInfoDao().insertOrders(listOrders)
+        val allProducts = listOrders.flatMap { it.products }
+        db.orderProductsInfoDao().insertProducts(allProducts)
+
+        orderList = when (_index.value) {
+            0-> db.orderInfoDao().getOrdersList1()
+            1-> db.orderInfoDao().getOrdersList2()
+            2-> db.orderInfoDao().getOrdersList3()
+            else -> db.orderInfoDao().getOrdersList1()
+        }
+    }
+
+    private fun onReceiveOrders(orders: List<Order>) {
+        orders.apply {
+            this.forEach {order ->
+                order.modified = false
+            }
+        }
+        updateOrdersDB(orders)
+        Log.d("TEST_OF_LOADING_DATA", "Success: $orders")
+        toastMessage("Обмен данными: ОК!")
+    }
+
+    private fun onReceiveOrdersError(error:Throwable){
+        Log.d("TEST_OF_LOADING_DATA", "Failure: ${error.message}")
+        toastMessage("Обмен данными: ${error.message}")
+    }
+
+
+    private fun sendData(
+        listOrders: List<Order>? = null) {
+
+        headers = getHeaders() ?: return
+
+        val disposable : Disposable
+
+        if (listOrders.isNullOrEmpty()) {
+            disposable = ApiFactory.apiService.getOrders(headers)
+            .map { it.orders.map { it } }
+            .subscribeOn(Schedulers.io())
+            .doFinally{srlMainView?.isRefreshing = false }
             .subscribe({
-                toastMessage("Отправка данных: $it")
-                Log.d("TEST_OF_LOADING_DATA", "Success: $it")
-                getDataFromServer(headers)
-            },{
-                toastMessage("Отправка данных: ${it.message}")
-                Log.d("TEST_OF_LOADING_DATA", "Failure: ${it.message}")
+                onReceiveOrders(it)
+            }, {
+                onReceiveOrdersError(it)
             })
+        } else {
+            disposable = ApiFactory.apiService.syncOrders(Orders(listOrders),headers )
+            .subscribeOn(Schedulers.io())
+            .map { it -> it.orders.map { it } }
+            .doFinally{srlMainView?.isRefreshing = false }
+            .subscribe({
+                onReceiveOrders(it)
+            },{
+                onReceiveOrdersError(it)
+            })
+        }
 
         compositeDisposable.add(disposable)
     }
 
-    private fun syncOrders(headers:Map<String,String>) {
-
-        val disposable = db.orderInfoDao().getAllOrders()
-            .subscribeOn(Schedulers.single())
-            .subscribe{ listData ->
-                if (listData.isEmpty()) return@subscribe
-
-                val listOrders = listData.map { it.order.apply { products = it.productsList } }
-
-                sendData(listOrders,headers)
-
-            }
-        compositeDisposable.add(disposable)
-
-    }
-
-    private fun loadData() {
-
-        val headers = getHeaders()
-
-        if (headers == null) {
-            srlMainView?.isRefreshing = false
-            return
-        }
-
-        syncOrders(headers)
-        getDataFromServer(headers)
-
-        srlMainView?.isRefreshing = false
-
-    }
-
-    private fun updateOrderAndSync (uid: String,isCancelled:Boolean,isDelivered:Boolean) {
-
-        val disposable = db.orderInfoDao().getOrderInfo(uid)
-            .map { it -> it.apply {
-                it.isCancelled = isCancelled
-                it.isDelivered = isDelivered
-            }}
-            .subscribeOn(Schedulers.single())
-            .doAfterSuccess { loadData() }
-            .subscribe { it ->
-
-                db.orderInfoDao().insertOrder(it)
-                val products = db.orderProductsInfoDao().getOrderProductsList(uid)
-
-                if (isCancelled) {
-                    for (product in products) product.delivered = false
-                    db.orderProductsInfoDao().insertProducts(products)
-                }
-
-            }
-        compositeDisposable.add(disposable)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        compositeDisposable.dispose()
-    }
-
-    private fun toastMessage(msg:String) {
-        Handler(Looper.getMainLooper()).post {
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun getHeaders() : Map<String,String>? {
-
-        val accessToken = PrefHelper.preferences.getString("accessToken", null) ?: return null
-
-        val fcmToken = context.getSharedPreferences("_", Context.MODE_PRIVATE).getString("fb",null)
-
-        if (fcmToken == null) {
-            toastMessage("Токен не получен от сервера Google")
-            return null
-        }
-
-        return mapOf("AccessToken" to accessToken,"FCMToken" to fcmToken)
+    private fun sendData( order: Order?) {
+        if (order != null) sendData(listOf(order))
     }
 
 }
