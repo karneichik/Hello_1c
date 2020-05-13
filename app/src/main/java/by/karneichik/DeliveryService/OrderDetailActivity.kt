@@ -1,7 +1,6 @@
 package by.karneichik.DeliveryService
 
 import android.Manifest
-import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
@@ -21,7 +20,6 @@ import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -32,7 +30,6 @@ import by.karneichik.DeliveryService.adapters.ProductListAdapter
 import by.karneichik.DeliveryService.pojo.Product
 import by.karneichik.DeliveryService.viewModels.OrderViewModel
 import kotlinx.android.synthetic.main.activity_order_detail.*
-
 
 class OrderDetailActivity : AppCompatActivity() {
 
@@ -54,7 +51,6 @@ class OrderDetailActivity : AppCompatActivity() {
 
                 Toast.makeText(this@OrderDetailActivity, R.string.action_save, Toast.LENGTH_SHORT)
                     .show()
-//                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
                 viewModel.saveOrder()
                 finish()
                 true
@@ -63,7 +59,6 @@ class OrderDetailActivity : AppCompatActivity() {
             R.id.action_cancel_order -> {
                 Toast.makeText(this@OrderDetailActivity, R.string.action_cancel_order, Toast.LENGTH_SHORT)
                     .show()
-//                val uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
                 viewModel.cancelOrder()
                 finish()
                 true
@@ -128,6 +123,18 @@ class OrderDetailActivity : AppCompatActivity() {
         }
         uid = intent.getStringExtra(EXTRA_UID_ORDER)!!
 
+        val fadeIn = ObjectAnimator.ofFloat(tvTotalSum, "alpha", 0f, 1f).apply {
+            duration = 1000
+        }
+
+        val fadeOut = ObjectAnimator.ofFloat(tvTotalSum, "alpha", 1f, 0f).apply {
+            duration = 1000
+        }
+
+        val moveIn = ObjectAnimator.ofFloat(tvTotalSum, "translationY", -100F,0F).apply {
+            duration = 1000
+        }
+
         viewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
         viewModel.getProductsList(uid).observe(this, Observer {
             adapter.productInfoList = it
@@ -174,43 +181,13 @@ class OrderDetailActivity : AppCompatActivity() {
 
                 }
 
-                val fadeIn = ObjectAnimator.ofFloat(tvTotalSum, "alpha", 0f, 1f).apply {
-                    duration = 1000
-                }
-
-                val fadeOut = ObjectAnimator.ofFloat(tvTotalSum, "alpha", 1f, 0f).apply {
-                    duration = 1000
-                }
-
-                val moveIn = ObjectAnimator.ofFloat(tvTotalSum, "translationY", -100F,0F).apply {
-                    duration = 1000
-                }
-                
                 AnimatorSet().apply {
                     play(fadeOut)
                     tvTotalSum.text = totalsum.toString()
                     play(fadeIn).with(moveIn)
                     start()
                 }
-
-
             }
-//
-//
-////            val swipeOut = ObjectAnimator.ofFloat(tvTotalSum, "translationY",100F,0F).apply{
-////                duration = 100
-////            }
-////            val swipeIn = ObjectAnimator.ofFloat(tvTotalSum, "translationY",0F,100F).apply{
-////                duration = 100
-////            }
-//
-//
-//
-//            AnimatorSet().apply {
-//                play(fadeIn).before(fadeOut)
-////                play(swipeIn).before(swipeOut)
-//                start()
-//            }
         })
 
 

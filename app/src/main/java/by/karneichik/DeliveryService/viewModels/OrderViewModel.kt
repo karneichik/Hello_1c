@@ -39,12 +39,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setIndex(index: Int) {
         _index.value = index
-        orderList = when (index) {
-            0-> db.orderInfoDao().getOrdersList1()
-            1-> db.orderInfoDao().getOrdersList2()
-            2-> db.orderInfoDao().getOrdersList3()
-            else -> db.orderInfoDao().getOrdersList1()
-        }
+        updateOrderList()
     }
 
     override fun onCleared() {
@@ -96,35 +91,51 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     private fun getModifiedOrders() : Single<List<OrderWithProducts>> = db.orderInfoDao().getModifiedOrdersList()
 
     fun cancelOrder(uid: String? = null) {
-
-        if (uid != null) order = db.orderInfoDao().getOrderInfoLiveDate(uid)
+        if (uid != null) {
+            order = db.orderInfoDao().getOrderInfoLiveDate(uid)
+            allProducts = db.orderProductsInfoDao().getOrderProductsLiveData(uid)
+        }
 
         with(order.value) {
             this?.modified = true
             this?.isDelivered = true
             this?.isCancelled = true
         }
-        val orderToSent = order.value
-        orderToSent.apply {
-            this?.products = allProducts.value!!
-        }
 
-        sendData(orderToSent)
-//        updateOrder(uid,isCancelled = true, isDelivered = true)
+        insertAndSyncOrder()
     }
 
     fun saveOrder() {
+
         with(order.value) {
             this?.modified = true
             this?.isDelivered = true
             this?.isCancelled = false
         }
-        val orderToSent = order.value
-        orderToSent.apply {
-            this?.products = allProducts.value!!
+
+        insertAndSyncOrder()
+    }
+
+    private fun insertAndSyncOrder() {
+
+        val orderToSent = order.value ?:return
+        val productsList = allProducts.value ?:return
+
+        AsyncTask.execute {
+            db.orderInfoDao().insertOrder(orderToSent)
+            if (orderToSent.isCancelled) {
+                for (product in productsList) {
+                    if (product.delivered) {
+                        product.delivered = false
+                        db.orderProductsInfoDao().insertProduct(product)
+                    }
+                }
+            }
         }
+
+        orderToSent.apply { products = productsList }
+
         sendData(orderToSent)
-//        updateOrder(uid,isCancelled = false, isDelivered = true)
     }
 
     fun splitProduct(product: Product,newCount:Int) {
@@ -202,19 +213,25 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    private fun updateOrdersDB(listOrders: List<Order>) {
-        db.orderProductsInfoDao().deleteAllProducts()
-
-        db.orderInfoDao().insertOrders(listOrders)
-        val allProducts = listOrders.flatMap { it.products }
-        db.orderProductsInfoDao().insertProducts(allProducts)
-
+    private fun updateOrderList(){
         orderList = when (_index.value) {
             0-> db.orderInfoDao().getOrdersList1()
             1-> db.orderInfoDao().getOrdersList2()
             2-> db.orderInfoDao().getOrdersList3()
             else -> db.orderInfoDao().getOrdersList1()
         }
+    }
+
+    private fun updateOrdersDB(listOrders: List<Order>) {
+
+        db.orderInfoDao().deleteAllOrders()
+        db.orderProductsInfoDao().deleteAllProducts()
+
+        db.orderInfoDao().insertOrders(listOrders)
+        val allProducts = listOrders.flatMap { it.products }
+        db.orderProductsInfoDao().insertProducts(allProducts)
+
+        updateOrderList()
     }
 
     private fun onReceiveOrders(orders: List<Order>) {

@@ -28,5 +28,5 @@
     <string name="no">Нет</string>
     <string name="client_comment">Инфо по доставке:</string>
     <string name="split_count_title">Укажите кол-во для новой строки</string>
-    <string name="dialog_call_select_title">Выбор телефона для звонка</string>
+    <string name="dialog_call_select_title">Номер для вызова</string>
 </resources>
