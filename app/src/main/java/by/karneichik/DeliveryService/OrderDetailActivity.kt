@@ -16,6 +16,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -136,11 +137,11 @@ class OrderDetailActivity : AppCompatActivity() {
         }
 
         viewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
-        viewModel.getProductsList(uid).observe(this, Observer {
+        viewModel.getProductsList(uid).observe(this, {
             adapter.productInfoList = it
         })
-        viewModel.getOrderInfo(uid).observe(this, Observer {
 
+        viewModel.getOrderInfo(uid).observe(this, {
             with(it) {
                 tvClient_FIO.text = client_fio
                 tvClient_phone.text = client_phone
@@ -190,7 +191,6 @@ class OrderDetailActivity : AppCompatActivity() {
             }
         })
 
-
         rvProductList.adapter = adapter
 
         adapter.onProductUngroupClickListener = object : ProductListAdapter.OnProductUngroupClickListener {
@@ -222,6 +222,8 @@ class OrderDetailActivity : AppCompatActivity() {
 
         enableSwipe()
 
+        enableMinimize()
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -229,29 +231,10 @@ class OrderDetailActivity : AppCompatActivity() {
         return true
     }
 
-//    override fun onRequestPermissionsResult(requestCode: Int,
-//                                            permissions: Array<String>, grantResults: IntArray) {
-//        when (requestCode) {
-//            MY_PERMISSIONS_REQUEST_READ_CONTACTS -> {
-//                // If request is cancelled, the result arrays are empty.
-//                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-//                    // permission was granted, yay! Do the
-//                    // contacts-related task you need to do.
-//                }
-//                else {
-//                    // permission denied, boo! Disable the
-//                    // functionality that depends on this permission.
-//                }
-//                return
-//            }
-//
-//            // Add other 'when' lines to check for other
-//            // permissions this app might request.
-//            else -> {
-//                // Ignore all other requests.
-//            }
-//        }
-//    }
+    private fun enableMinimize() {
+
+        
+    }
 
     private fun enableSwipe() {
         val simpleItemTouchCallback =

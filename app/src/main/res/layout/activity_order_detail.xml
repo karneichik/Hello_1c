@@ -34,7 +34,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_client_FIO">
 
                 <TextView
                     android:id="@+id/tvClient_FIO_Label"
@@ -55,13 +56,14 @@
                     android:layout_weight="72"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    tools:text="7352.5" />
+                    tools:text="Иванов Иван Иванович" />
 
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_client_phone">
 
                 <TextView
                     android:id="@+id/tvClient_phone_Label"
@@ -89,7 +91,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_address">
 
                 <TextView
                     android:id="@+id/tvAddress_label"
@@ -113,13 +116,14 @@
                     android:singleLine="false"
                     android:textColor="@android:color/holo_green_dark"
                     android:textSize="16sp"
-                    tools:text="7820.1" />
+                    tools:text="Где-то на луне" />
 
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_totalSum">
 
                 <TextView
                     android:id="@+id/tvTotalSum_label"
@@ -142,12 +146,13 @@
                     android:layout_weight="72"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    tools:text="Bitfinex" />
+                    tools:text="100 руб" />
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_payForm">
 
                 <TextView
                     android:id="@+id/tvPayForm_label"
@@ -176,7 +181,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_time">
 
                 <TextView
                     android:id="@+id/tvTime_label"
@@ -205,7 +211,8 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/row_client_comment">
 
                 <TextView
                     android:id="@+id/tvClient_comment_label"

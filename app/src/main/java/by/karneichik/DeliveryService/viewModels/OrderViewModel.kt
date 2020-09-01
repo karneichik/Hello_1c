@@ -37,6 +37,19 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     private var srlMainView: SwipeRefreshLayout? = null
     private lateinit var headers:Map<String,String>
 
+    private fun cancelSRLrefreshing() {
+
+        val mainHandler = Handler(context.mainLooper)
+
+        val myRunnable = Runnable {
+            if (srlMainView != null || srlMainView!!.isRefreshing) {
+                srlMainView?.isRefreshing = false
+            }
+        }
+        mainHandler.post(myRunnable)
+
+    }
+
     fun setIndex(index: Int) {
         _index.value = index
         updateOrderList()
@@ -59,7 +72,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
         if (accessToken.isNullOrEmpty()) {
             toastMessage("Не заполнены настройки")
-            srlMainView?.isRefreshing = false
+            cancelSRLrefreshing()
             return null
         }
 
@@ -67,7 +80,7 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
         if (fcmToken.isNullOrEmpty()) {
             toastMessage("Токен не получен от сервера Google")
-            srlMainView?.isRefreshing = false
+            cancelSRLrefreshing()
             return null
         }
 
@@ -238,6 +251,8 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         orders.apply {
             this.forEach {order ->
                 order.modified = false
+                val filteredList= order.products.filter { it.delivered}
+                order.totalsum = filteredList.sumByDouble { it.sum }
             }
         }
         updateOrdersDB(orders)
@@ -262,21 +277,23 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
             disposable = ApiFactory.apiService.getOrders(headers)
             .map { it.orders.map { it } }
             .subscribeOn(Schedulers.io())
-            .doFinally{srlMainView?.isRefreshing = false }
             .subscribe({
                 onReceiveOrders(it)
+                cancelSRLrefreshing()
             }, {
                 onReceiveOrdersError(it)
+                cancelSRLrefreshing()
             })
         } else {
             disposable = ApiFactory.apiService.syncOrders(Orders(listOrders),headers )
             .subscribeOn(Schedulers.io())
             .map { it -> it.orders.map { it } }
-            .doFinally{srlMainView?.isRefreshing = false }
             .subscribe({
                 onReceiveOrders(it)
+                cancelSRLrefreshing()
             },{
                 onReceiveOrdersError(it)
+                cancelSRLrefreshing()
             })
         }
 
@@ -288,3 +305,4 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 }
+

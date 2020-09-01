@@ -45,13 +45,13 @@ class OrdersFragment() : Fragment() {
 
         recycleView.adapter = adapter
 
-        viewModel.orderList.observe(viewLifecycleOwner, Observer { adapter.orderInfoList = it })
+        viewModel.orderList.observe(viewLifecycleOwner, { adapter.orderInfoList = it })
 
         val swipeRefreshLayout = root.findViewById<SwipeRefreshLayout>(R.id.srlMainView)
 
         swipeRefreshLayout.setOnRefreshListener {
-            viewModel.refreshData(swipeRefreshLayout)
             swipeRefreshLayout.isRefreshing = true
+            viewModel.refreshData(swipeRefreshLayout)
         }
 
         return root
